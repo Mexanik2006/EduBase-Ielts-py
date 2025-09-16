@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Talaba Paneli - EduBase{% endblock %}
+
+{% block content %}
+<style>
+    /* Custom light/dark mode classes for this page */
+    .light .bg-card {
+        background-color: #F7F7F7;
+    }
+
+    .dark .bg-card {
+        background-color: #1A1A1A;
+    }
+
+    .light .border-card {
+        border-color: #E0E0E0;
+    }
+
+    .dark .border-card {
+        border-color: #333333;
+    }
+
+    .light .text-on-card {
+        color: #000000;
+    }
+
+    .dark .text-on-card {
+        color: #FFFFFF;
+    }
+
+    .light .text-subtle {
+        color: #555555;
+    }
+
+    .dark .text-subtle {
+        color: #AAAAAA;
+    }
+</style>
+
+<div class="space-y-8">
+    <div>
+        <h1 class="font-sans text-3xl font-bold tracking-tight text-text-on-card">Salom, {{ user.get_full_name|default:user.username }}!</h1>
+        <p class="mt-2 text-subtle">Talaba paneli</p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="bg-card border border-card rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                    <i class="fas fa-clipboard-list text-text-on-card text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-subtle">Jami urinishlar</p>
+                    <p class="text-2xl font-bold text-text-on-card">{{ total_attempts }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-card border border-card rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                    <i class="fas fa-check-circle text-text-on-card text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-subtle">Tugallangan</p>
+                    <p class="text-2xl font-bold text-text-on-card">{{ completed_attempts }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-card border border-card rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                    <i class="fas fa-star text-text-on-card text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-subtle">O'rtacha ball</p>
+                    <p class="text-2xl font-bold text-text-on-card">{{ avg_score }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-card border border-card rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                    <i class="fas fa-users text-text-on-card text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-subtle">Guruh</p>
+                    <p class="text-2xl font-bold text-text-on-card">{% if student_group %}{{ student_group.name }}{% else %}-{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div class="bg-card border border-card rounded-xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-card">
+                <h3 class="font-sans text-lg font-semibold text-text-on-card">Mavjud testlar</h3>
+                <p class="mt-1 text-sm text-subtle">Sizga tayinlangan testlar</p>
+            </div>
+            <div class="p-6">
+                {% if available_exams %}
+                <div class="space-y-4">
+                    {% for assignment in available_exams %}
+                    <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border border-card/50 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-text-on-card truncate">{{ assignment.exam.title }}</p>
+                            <p class="text-xs text-subtle mt-1">{{ assignment.exam.get_section_type_display }}</p>
+                        </div>
+                        <a href="{% url 'exam_detail' assignment.exam.id %}"
+                            class="inline-flex items-center px-3 py-1.5 bg-black text-white dark:bg-white dark:text-black text-xs font-medium rounded-lg hover:opacity-80 transition-all focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white">
+                            Ko'rish
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if available_exams_count %}
+                <div class="mt-6 text-center">
+                    <a href="{% url 'exam_list' %}" class="inline-flex items-center px-4 py-2 bg-transparent text-text-on-card border border-text-on-card/50 rounded-lg text-sm font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors">
+                        Hammasini ko'rish
+                    </a>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="text-center py-8">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4 bg-gray-200 dark:bg-gray-700">
+                        <i class="fas fa-book-open text-gray-500 dark:text-gray-400 text-xl"></i>
+                    </div>
+                    <p class="text-subtle">Hozircha mavjud testlar yo'q.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bg-card border border-card rounded-xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-card">
+                <h3 class="font-sans text-lg font-semibold text-text-on-card">So'nggi urinishlar</h3>
+                <p class="mt-1 text-sm text-subtle">Sizning so'nggi test urinishlaringiz</p>
+            </div>
+            <div class="p-6">
+                {% if student_attempts %}
+                <div class="space-y-4">
+                    {% for attempt in student_attempts %}
+                    <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border border-card/50 transition-colors">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-text-on-card truncate">{{ attempt.exam.title }}</p>
+                            <div class="flex items-center space-x-2 mt-1">
+                                <p class="text-xs text-subtle">{{ attempt.created_at|date:"d.m.Y H:i" }}</p>
+                                <span class="text-xs text-subtle">•</span>
+                                {% if attempt.status == 'completed' %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-200">Tugallangan</span>
+                                {% elif attempt.status == 'submitted' %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-200 text-blue-800 dark:bg-blue-700 dark:text-blue-200">Tekshirilmoqda</span>
+                                {% else %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200">Jarayonda</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if attempt.total_score %}
+                        <div class="ml-4 flex-shrink-0">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-medium bg-black text-white dark:bg-white dark:text-black">
+                                {{ attempt.total_score }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if student_attempts_count %}
+                <div class="mt-6 text-center">
+                    <a href="{% url 'my_attempts' %}" class="inline-flex items-center px-4 py-2 bg-transparent text-text-on-card border border-text-on-card/50 rounded-lg text-sm font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors">
+                        Hammasini ko'rish
+                    </a>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="text-center py-8">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4 bg-gray-200 dark:bg-gray-700">
+                        <i class="fas fa-history text-gray-500 dark:text-gray-400 text-xl"></i>
+                    </div>
+                    <p class="text-subtle">Hozircha urinishlar yo'q.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,729 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.title }} - Reading{% endblock %}
+
+{% block content %}
+<style>
+    /* Custom light/dark mode classes for this page, consistent with other pages */
+    .light .bg-card {
+        background-color: #FFFFFF;
+    }
+
+    .dark .bg-card {
+        background-color: #1A1A1A;
+    }
+
+    .light .border-card {
+        border-color: #E0E0E0;
+    }
+
+    .dark .border-card {
+        border-color: #333333;
+    }
+
+    .light .text-on-card {
+        color: #000000;
+    }
+
+    .dark .text-on-card {
+        color: #FFFFFF;
+    }
+
+    .light .text-subtle {
+        color: #555555;
+    }
+
+    .dark .text-subtle {
+        color: #AAAAAA;
+    }
+
+    .passage-content p {
+        margin-bottom: 1rem;
+    }
+
+    .passage-content h1,
+    .passage-content h2,
+    .passage-content h3 {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="py-6">
+    <div class="px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-text-on-card">{{ exam.title }} - Reading</h1>
+                <p class="mt-1 text-sm text-subtle">Reading bo'limi testi</p>
+                <p class="mt-1 text-sm text-subtle">
+                    <span id="currentPassageText">Passage 1</span> of {{ exam.reading_passages.count }}
+                </p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <div class="flex space-x-2">
+                    {% for passage in exam.reading_passages.all %}
+                    <button type="button"
+                        class="passage-indicator w-8 h-8 rounded-full border-2 border-card text-sm font-medium focus:outline-none transition-all duration-200"
+                        data-passage="{{ forloop.counter0 }}">
+                        {{ forloop.counter }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <form id="examForm" method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <div class="flex justify-between items-center mb-4">
+                <button type="button" id="prevPassageBtn"
+                    class="inline-flex items-center px-4 py-2 border border-card text-sm font-medium rounded-md text-subtle bg-card hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-text-on-card transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-chevron-left mr-2"></i> Oldingi passage
+                </button>
+                <button type="button" id="nextPassageBtn"
+                    class="inline-flex items-center px-4 py-2 border border-card text-sm font-medium rounded-md text-subtle bg-card hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-text-on-card transition-all duration-200">
+                    Keyingi passage <i class="fas fa-chevron-right ml-2"></i>
+                </button>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-6">
+                <div class="flex-1 lg:flex-[6] space-y-6">
+                    {% for passage in exam.reading_passages.all %}
+                    <div class="passage-container" data-passage="{{ forloop.counter0 }}"
+                        style="{% if not forloop.first %}display: none;{% endif %}">
+                        <div class="bg-card shadow rounded-lg overflow-hidden border border-card">
+                            <div class="px-6 py-4 border-b border-card">
+                                <h3 class="text-xl font-medium text-text-on-card">{{ passage.title }}</h3>
+                                {% if passage.subtitle %}
+                                <p class="mt-1 text-sm text-subtle">{{ passage.subtitle }}</p>
+                                {% endif %}
+                                {% if passage.time %}
+                                <p class="mt-1 text-xs text-subtle">Vaqt: {{ passage.time }} daqiqa</p>
+                                {% endif %}
+                            </div>
+                            <div class="p-6 passage-content max-h-[80vh] overflow-y-auto leading-relaxed text-text-on-card space-y-4">
+                                {{ passage.content|linebreaks  }}
+                            </div>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="flex-1 lg:flex-[4] space-y-6">
+                    {% for passage in exam.reading_passages.all %}
+                    <div class="questions-container" data-passage="{{ forloop.counter0 }}"
+                        style="{% if not forloop.first %}display: none;{% endif %}">
+                        {% for question in passage.questions.all %}
+                        <div class="bg-card shadow rounded-lg overflow-hidden border border-card">
+                            <div class="p-4 border-b border-card">
+                                <h3 class="text-base font-semibold text-text-on-card">
+                                    Question {{ question.start_number }}–{{ question.end_number }}
+                                </h3>
+                            </div>
+                            <div class="p-6 text-sm text-subtle space-y-3">
+                                {% if question.question_type == 'true_false_not_given' %}
+                                <p class="font-medium text-text-on-card">
+                                    Do the following statements agree with the information given in
+                                    {{ exam.get_section_type_display }} Passage {{ forloop.parentloop.counter }}?
+                                </p>
+                                <p>In boxes {{ question.start_number }}–{{ question.end_number }} on your answer sheet, choose</p>
+                                <ul class="list-disc pl-6 space-y-1">
+                                    <li><span class="font-semibold text-text-on-card">TRUE</span> – if the statement agrees with the information</li>
+                                    <li><span class="font-semibold text-text-on-card">FALSE</span> – if the statement contradicts the information</li>
+                                    <li><span class="font-semibold text-text-on-card">NOT GIVEN</span> – if there is no information on this</li>
+                                </ul>
+
+                                {% elif question.question_type == 'yes_no_not_given' %}
+                                <p class="font-medium text-text-on-card">
+                                    Do the following statements agree with the information given in
+                                    {{ exam.get_section_type_display }} Passage {{ forloop.parentloop.counter }}?
+                                </p>
+                                <p>In boxes {{ question.start_number }}–{{ question.end_number }} on your answer sheet, choose</p>
+                                <ul class="list-disc pl-6 space-y-1">
+                                    <li><span class="font-semibold text-text-on-card">YES</span> – if the statement agrees with the information</li>
+                                    <li><span class="font-semibold text-text-on-card">NO</span> – if the statement contradicts the information</li>
+                                    <li><span class="font-semibold text-text-on-card">NOT GIVEN</span> – if there is no information on this</li>
+                                </ul>
+
+                                {% elif question.question_type == 'mcq' %}
+                                <p class="font-medium text-text-on-card">Choose the correct letter, A, B, C or D.</p>
+                                <p>Write the correct letter in boxes {{ question.start_number }}–{{ question.end_number }} on your
+                                    answer sheet.</p>
+                                {% elif question.question_type == 'mcq_multiple_answer' %}
+                                <p class="font-medium text-text-on-card">Choose the correct letters, A, B, C or D.</p>
+                                <p class="text-sm font-medium text-yellow-600 dark:text-yellow-400">You may choose more than one answer.</p>
+                                <p>Write the correct letters in boxes {{ question.start_number }}–{{ question.end_number }} on your
+                                    answer sheet.</p>
+                                {% elif question.question_type == 'matching_information' %}
+                                {% with opts=question.subquestions.first.options_list %}
+                                {% with opts_clean=opts|cut:" " %}
+                                <p class="font-medium text-text-on-card">
+                                    {{ exam.get_section_type_display }} Passage {{ forloop.parentloop.counter }}
+                                    has {{ question.subquestions.first.section_count }} sections,
+                                    {{ question.subquestions.first.options_list|slice:":1" }}–
+                                    {{ question.subquestions.first.options_list|slice:"-1:" }}.
+                                </p>
+                                {% endwith %}
+                                {% endwith %}
+                                <p>Which section contains the following information?</p>
+                                <p>Choose the correct letter in boxes {{ question.start_number }}–{{ question.end_number }} on your
+                                    answer sheet.</p>
+                                <p><span class="font-semibold text-text-on-card">NB:</span> You may use any letter more than once.</p>
+                                {% elif question.question_type == 'matching_headings' %}
+                                {% with opts=question.subquestions.first.options_list %}
+                                <p>Look at the following statements (Questions
+                                    {{ question.start_number }}–{{ question.end_number }}) and the list of people below.</p>
+                                <p class="font-medium text-text-on-card">
+                                    Match each statement with the correct person,
+                                    {{ question.subquestions.first.options_list|slice:":1" }}–
+                                    {{ question.subquestions.first.options_list|slice:"-1:" }}.
+                                </p>
+                                {% endwith %}
+                                <p>Choose the correct letter, A-C, in boxes {{ question.start_number }}–{{ question.end_number }} on
+                                    your answer sheet.</p>
+                                <p><span class="font-semibold text-text-on-card">NB:</span> You may use any letter more than once.</p>
+                                {% elif question.question_type == 'one_word_and_or_a_number' or question.question_type == 'one_word_only' or question.question_type == 'no_word_and_or_a_number'%}
+                                <p class="font-medium text-text-on-card">Complete the notes below.</p>
+                                <p>
+                                    {% if question.question_type == 'one_word_and_or_a_number' %}
+                                    Choose <span class="font-semibold text-text-on-card">ONE WORD AND/OR A NUMBER</span> from the passage
+                                    for each answer.
+                                    {% elif question.question_type == 'one_word_and_or_a_number' %}
+                                    Choose <span class="font-semibold text-text-on-card">ONE WORD ONLY</span> from the passage for each
+                                    answer.
+                                    {% elif question.question_type == 'no_word_and_or_a_number' %}
+                                    Choose <span class="font-semibold text-text-on-card">NO MORE THAN TWO/THREE WORDS OR A NUMBER</span> from the passage for each answer.
+                                    {% endif %}
+                                </p>
+                                <p>
+                                    Write your answers in boxes {{ question.start_number }}–{{ question.end_number }} on your answer
+                                    sheet.
+                                </p>
+                                {% endif %}
+                            </div>
+
+
+                            {% if question.question_type == 'matching_headings' %}
+                                {% with subq=question.subquestions.first %}
+                                    {% if subq %}
+                                        <div class="bg-card shadow rounded-lg overflow-hidden border border-card p-6 space-y-4">
+                                            {% if subq.title %}
+                                                <h4 class="font-semibold text-lg text-text-on-card">
+                                                    {{ subq.title }}
+                                                </h4>
+                                            {% endif %}
+
+                                            {% if subq.options_list %}
+                                                <ul class="list-decimal list-inside space-y-2 text-sm text-subtle">
+                                                    {% for opt in subq.options_list.splitlines %}
+                                                        <li class="px-3 py-2 border border-card rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                                                            {{ opt }}
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+
+                            <div class="question-container p-6 border-t border-card" data-question-type="{{ question.question_type }}"
+                                data-question-id="{{ question.id }}" data-start-number="{{ question.start_number }}">
+                                {% for subquestion in question.subquestions.all %}
+                                <div class="subquestion-data" data-subquestion-id="{{ subquestion.id }}"
+                                    data-subquestion-text="{{ subquestion.text }}" data-choice-a="{{ subquestion.choice_a|default:'' }}"
+                                    data-choice-b="{{ subquestion.choice_b|default:'' }}"
+                                    data-choice-c="{{ subquestion.choice_c|default:'' }}"
+                                    data-choice-d="{{ subquestion.choice_d|default:'' }}"
+                                    data-choice-e="{{ subquestion.choice_e|default:'' }}"
+                                    data-choice-f="{{ subquestion.choice_f|default:'' }}"
+                                    data-options-list="{{ subquestion.options_list|default:'' }}"
+                                    data-title="{{ subquestion.title|default:'' }}" style="display: none;">
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="text-center mt-8" id="submitButtonContainer" style="display: none;">
+                <button type="submit"
+                    class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-all duration-200 hover:scale-[1.05]">
+                    <i class="fas fa-paper-plane mr-2"></i> Javoblarni yuborish
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let currentPassage = 0;
+    const totalPassages = {{ exam.reading_passages.count }};
+
+    function showPassage(passageIndex) {
+        document.querySelectorAll('.passage-container, .questions-container').forEach(container => {
+            container.style.display = 'none';
+        });
+
+        const passageContainer = document.querySelector(`[data-passage="${passageIndex}"].passage-container`);
+        const questionsContainer = document.querySelector(`[data-passage="${passageIndex}"].questions-container`);
+
+        if (passageContainer) passageContainer.style.display = 'block';
+        if (questionsContainer) questionsContainer.style.display = 'block';
+
+        document.getElementById('currentPassageText').textContent = `Passage ${passageIndex + 1}`;
+
+        const prevBtn = document.getElementById('prevPassageBtn');
+        const nextBtn = document.getElementById('nextPassageBtn');
+        const submitContainer = document.getElementById('submitButtonContainer');
+
+        prevBtn.disabled = passageIndex === 0;
+
+        if (passageIndex === totalPassages - 1) {
+            nextBtn.style.display = 'none';
+            submitContainer.style.display = 'block';
+        } else {
+            nextBtn.style.display = 'inline-flex';
+            submitContainer.style.display = 'none';
+        }
+
+        document.querySelectorAll('.passage-indicator').forEach((indicator, index) => {
+            if (index === passageIndex) {
+                indicator.classList.add('bg-black', 'text-white', 'dark:bg-white', 'dark:text-black');
+                indicator.classList.remove('border-card');
+            } else {
+                indicator.classList.remove('bg-black', 'text-white', 'dark:bg-white', 'dark:text-black');
+                indicator.classList.add('border-card');
+            }
+        });
+
+        currentPassage = passageIndex;
+    }
+
+    document.getElementById('prevPassageBtn').addEventListener('click', () => {
+        if (currentPassage > 0) {
+            showPassage(currentPassage - 1);
+        }
+    });
+
+    document.getElementById('nextPassageBtn').addEventListener('click', () => {
+        if (currentPassage < totalPassages - 1) {
+            showPassage(currentPassage + 1);
+        }
+    });
+
+    document.querySelectorAll('.passage-indicator').forEach(indicator => {
+        indicator.addEventListener('click', () => {
+            const passageIndex = parseInt(indicator.dataset.passage);
+            showPassage(passageIndex);
+        });
+    });
+
+    function renderQuestions() {
+        const questionContainers = document.querySelectorAll('.question-container');
+
+        questionContainers.forEach(container => {
+            const questionType = container.dataset.questionType;
+            const questionId = container.dataset.questionId;
+            const startNumber = parseInt(container.dataset.startNumber);
+            const subquestions = container.querySelectorAll('.subquestion-data');
+
+            container.innerHTML = '';
+
+            const separateDivTypes = [
+                'true_false_not_given',
+                'yes_no_not_given',
+                'matching_information',
+                'matching_headings',
+                'matching_features',
+                'matching_sentence_endings',
+                'mcq',
+                'mcq_multiple_answer',
+                'fill_blank',
+                'short_answer',
+                'sentence_completion',
+                'summary_completion',
+                'note_completion',
+                'table_completion',
+                'flow_chart_completion',
+                'diagram_labelling'
+            ];
+
+            const singleDivTypes = [
+                'one_word_and_or_a_number',
+                'one_word_only',
+                'no_more_than_two_words',
+                'no_more_than_three_words',
+                'no_word_and_or_a_number',
+                'choose_from_list'
+            ];
+
+            if (separateDivTypes.includes(questionType)) {
+                subquestions.forEach((subquestionData, index) => {
+                    const subquestionDiv = document.createElement('div');
+                    subquestionDiv.className = 'bg-card shadow rounded-lg overflow-hidden border border-card mb-4';
+
+                    const subquestionId = subquestionData.dataset.subquestionId;
+                    const subquestionText = subquestionData.dataset.subquestionText;
+                    const questionNumber = startNumber + index;
+
+                    let content = `
+                        <div class="p-4 border-b border-card">
+                            <h4 class="text-sm font-medium text-text-on-card">
+                                ${questionNumber}. ${subquestionText}
+                            </h4>
+                        </div>
+                        <div class="p-4">
+                    `;
+
+                    if (questionType === 'mcq') {
+                        content += '<div class="space-y-2">';
+                        ['a', 'b', 'c', 'd'].forEach(choice => {
+                            const choiceText = subquestionData.dataset[`choice${choice.toUpperCase()}`];
+                            if (choiceText && choiceText.trim()) {
+                                content += `
+                                    <div class="flex items-center">
+                                        <input type="radio" name="q_${subquestionId}" value="${choice.toUpperCase()}" id="q${subquestionId}_${choice}"
+                                            class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                        <label for="q${subquestionId}_${choice}" class="ml-3 block text-sm text-subtle">${choice.toUpperCase()}) ${choiceText}</label>
+                                    </div>
+                                `;
+                            }
+                        });
+                        content += '</div>';
+                    } else if (questionType === 'mcq_multiple_answer') {
+                        const optionsList = subquestionData.dataset.optionsList || '';
+                        content += '<div class="space-y-2">';
+
+                        if (optionsList && optionsList.trim()) {
+                            const options = optionsList.split('\n').filter(opt => opt.trim());
+                            options.forEach((option, optIndex) => {
+                                const optionLetter = String.fromCharCode(65 + optIndex);
+                                content += `
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="q_${subquestionId}[]" value="${optionLetter}" id="q${subquestionId}_${optionLetter.toLowerCase()}"
+                                            class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800 rounded">
+                                        <label for="q${subquestionId}_${optionLetter.toLowerCase()}" class="ml-3 block text-sm text-subtle">${optionLetter}) ${option.trim()}</label>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            ['a', 'b', 'c', 'd', 'e', 'f'].forEach(choice => {
+                                const choiceText = subquestionData.dataset[`choice${choice.toUpperCase()}`];
+                                if (choiceText && choiceText.trim()) {
+                                    content += `
+                                        <div class="flex items-center">
+                                            <input type="checkbox" name="q_${subquestionId}[]" value="${choice.toUpperCase()}" id="q${subquestionId}_${choice}"
+                                                class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800 rounded">
+                                            <label for="q${subquestionId}_${choice}" class="ml-3 block text-sm text-subtle">${choice.toUpperCase()}) ${choiceText}</label>
+                                        </div>
+                                    `;
+                                }
+                            });
+                        }
+                        content += '</div>';
+                    } else if (['matching_information', 'matching_headings', 'matching_features', 'matching_sentence_endings'].includes(questionType)) {
+                        const firstSubquestion = subquestions[0];
+                        const optionsList = firstSubquestion ? firstSubquestion.dataset.optionsList : subquestionData.dataset.optionsList;
+
+                        if (optionsList && optionsList.trim()) {
+                            const options = optionsList.split('\n').filter(opt => opt.trim());
+                            content += `
+                                <div class="mb-2">
+                                    <select name="q_${subquestionId}"
+                                        class="block w-full px-3 py-2 border border-card rounded-md shadow-sm focus:outline-none focus:ring-text-on-card focus:border-text-on-card bg-card text-text-on-card sm:text-sm">
+                                        <option value="" disabled selected>Javobni tanlang</option>
+                            `;
+                            options.forEach((option, optIndex) => {
+                                const optionLetter = String.fromCharCode(65 + optIndex);
+                                content += `<option value="${optionLetter}">${optionLetter}) ${option.trim()}</option>`;
+                            });
+                            content += '</select></div>';
+                        } else {
+                            content += `
+                                <div class="mb-2">
+                                    <select name="q_${subquestionId}"
+                                        class="block w-full px-3 py-2 border border-card rounded-md shadow-sm focus:outline-none focus:ring-text-on-card focus:border-text-on-card bg-card text-text-on-card sm:text-sm">
+                                        <option value="" disabled selected>Javobni tanlang</option>
+                            `;
+                            for (let i = 0; i < 8; i++) {
+                                const optionLetter = String.fromCharCode(65 + i);
+                                content += `<option value="${optionLetter}">${optionLetter}</option>`;
+                            }
+                            content += '</select></div>';
+                        }
+                    } else if (questionType === 'true_false_not_given') {
+                        content += `
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${subquestionId}" value="TRUE" id="q${subquestionId}_true"
+                                        class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                    <label for="q${subquestionId}_true" class="ml-3 block text-sm text-subtle">TRUE</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${subquestionId}" value="FALSE" id="q${subquestionId}_false"
+                                        class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                    <label for="q${subquestionId}_false" class="ml-3 block text-sm text-subtle">FALSE</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${subquestionId}" value="NOT GIVEN" id="q${subquestionId}_ng"
+                                        class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                    <label for="q${subquestionId}_ng" class="ml-3 block text-sm text-subtle">NOT GIVEN</label>
+                                </div>
+                            </div>
+                        `;
+                    } else if (questionType === 'yes_no_not_given') {
+                        content += `
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${subquestionId}" value="YES" id="q${subquestionId}_yes"
+                                        class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                    <label for="q${subquestionId}_yes" class="ml-3 block text-sm text-subtle">YES</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${subquestionId}" value="NO" id="q${subquestionId}_no"
+                                        class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                    <label for="q${subquestionId}_no" class="ml-3 block text-sm text-subtle">NO</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${subquestionId}" value="NOT GIVEN" id="q${subquestionId}_ng"
+                                        class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                    <label for="q${subquestionId}_ng" class="ml-3 block text-sm text-subtle">NOT GIVEN</label>
+                                </div>
+                            </div>
+                        `;
+                    } else if (['fill_blank', 'short_answer', 'sentence_completion', 'summary_completion', 'note_completion', 'table_completion', 'flow_chart_completion', 'diagram_labelling'].includes(questionType)) {
+                        content += `
+                            <input type="text" name="q_${subquestionId}"
+                                class="mt-1 block w-full px-3 py-2 border border-card rounded-md shadow-sm focus:outline-none focus:ring-text-on-card focus:border-text-on-card bg-card text-text-on-card sm:text-sm"
+                                placeholder="Javobingizni kiriting">
+                        `;
+                    }
+
+                    content += '</div></div>';
+                    subquestionDiv.innerHTML = content;
+                    container.appendChild(subquestionDiv);
+                });
+
+            } else if (singleDivTypes.includes(questionType)) {
+                const singleDiv = document.createElement('div');
+                singleDiv.className = 'bg-card shadow rounded-lg overflow-hidden border border-card';
+
+                let content = '<div class="p-6 space-y-4">';
+
+                const firstSubquestion = subquestions[0];
+                if (firstSubquestion && firstSubquestion.dataset.title) {
+                    content += `
+                        <h4 class="text-sm font-semibold text-text-on-card">
+                            ${firstSubquestion.dataset.title}
+                        </h4>
+                    `;
+                }
+
+                content += '<div class="space-y-3">';
+
+                subquestions.forEach((subquestionData, index) => {
+                    const subquestionId = subquestionData.dataset.subquestionId;
+                    const subquestionText = subquestionData.dataset.subquestionText;
+                    const questionNumber = startNumber + index;
+
+                    content += `
+                        <div class="flex items-start space-x-3">
+                            <span class="text-sm font-medium text-text-on-card min-w-[2rem]">
+                                ${questionNumber}.
+                            </span>
+                            <div class="flex-1">
+                    `;
+
+                    if (subquestionText.includes('__________')) {
+                        const parts = subquestionText.split('__________');
+                        content += `
+                            <div class="text-sm text-subtle flex items-center flex-wrap">
+                                <span>${parts[0]}</span>
+                                <input type="text" name="q_${subquestionId}"
+                                class="inline-block w-32 px-2 py-1 mx-1 border border-card rounded-md focus:border-text-on-card focus:outline-none bg-transparent text-center"
+                                placeholder="...">
+
+                                <span>${parts[1] || ''}</span>
+                            </div>
+                        `;
+                    } else if (['choose_from_list'].includes(questionType)) {
+                        const optionsList = subquestionData.dataset.optionsList || '';
+                        if (optionsList && optionsList.trim()) {
+                            const options = optionsList.split('\n').filter(opt => opt.trim());
+                            content += `
+                                <div class="text-sm text-subtle mb-2">
+                                    ${subquestionText}
+                                </div>
+                                <select name="q_${subquestionId}"
+                                    class="block w-full px-3 py-2 border border-card rounded-md shadow-sm focus:outline-none focus:ring-text-on-card focus:border-text-on-card bg-card text-text-on-card sm:text-sm">
+                                    <option value="" disabled selected>Ro'yxatdan tanlang</option>
+                            `;
+                            options.forEach((option, optIndex) => {
+                                content += `<option value="${option.trim()}">${option.trim()}</option>`;
+                            });
+                            content += '</select>';
+                        }
+                    } else {
+                        content += `
+                            <div class="text-sm text-subtle">
+                                ${subquestionText}
+                                <input type="text" name="q_${subquestionId}"
+                                    class="inline-block w-32 px-2 py-1 ml-2 border-b border-card focus:border-text-on-card focus:outline-none bg-transparent text-center"
+                                    placeholder="...">
+                            </div>
+                        `;
+                    }
+
+                    content += '</div></div>';
+                });
+
+                content += '</div></div>';
+                singleDiv.innerHTML = content;
+                container.appendChild(singleDiv);
+            }
+        });
+
+        initializeInputEventListeners();
+    }
+
+    function initializeInputEventListeners() {
+        document.querySelectorAll('input[type="radio"], input[type="text"], input[type="checkbox"], select').forEach(input => {
+            input.removeEventListener('change', saveAnswer);
+            input.removeEventListener('input', saveAnswer);
+
+            const savedValue = localStorage.getItem(`answer_${input.name}`);
+            if (savedValue) {
+                if (input.type === 'radio' && input.value === savedValue) {
+                    input.checked = true;
+                } else if (input.type === 'checkbox') {
+                    const savedValues = JSON.parse(savedValue || '[]');
+                    if (savedValues.includes(input.value)) {
+                        input.checked = true;
+                    }
+                } else if (input.type === 'text' || input.tagName === 'SELECT') {
+                    input.value = savedValue;
+                }
+            }
+
+            if (input.tagName === 'SELECT') {
+                input.addEventListener('change', saveAnswer);
+            } else if (input.type === 'radio' || input.type === 'checkbox') {
+                input.addEventListener('change', saveAnswer);
+            } else {
+                input.addEventListener('input', saveAnswer);
+            }
+        });
+    }
+
+    function saveAnswer() {
+        if (this.type === 'checkbox') {
+            const checkboxes = document.querySelectorAll(`input[name="${this.name}"]:checked`);
+            const values = Array.from(checkboxes).map(cb => cb.value);
+            localStorage.setItem(`answer_${this.name}`, JSON.stringify(values));
+        } else {
+            localStorage.setItem(`answer_${this.name}`, this.value);
+        }
+    }
+
+    let totalTime = 0;
+    {% for passage in exam.reading_passages.all %}
+    totalTime += {{ passage.time }};
+    {% endfor %}
+
+    let timeLeft = localStorage.getItem('examTimeLeft_{{ exam.id }}') || (totalTime * 60);
+    timeLeft = parseInt(timeLeft);
+
+    if (!localStorage.getItem('examStartTime_{{ exam.id }}')) {
+        localStorage.setItem('examStartTime_{{ exam.id }}', Date.now());
+    }
+
+    function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+
+        const navbarTimer = document.getElementById('examTimeLeft');
+        if (navbarTimer) {
+            navbarTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        if (timeLeft <= 0) {
+            document.getElementById('examForm').submit();
+            return;
+        }
+
+        timeLeft--;
+        localStorage.setItem('examTimeLeft_{{ exam.id }}', timeLeft);
+    }
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+
+    document.getElementById('examForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        localStorage.removeItem('examTimeLeft_{{ exam.id }}');
+        localStorage.removeItem('examStartTime_{{ exam.id }}');
+
+        document.querySelectorAll('input[name^="q_"], select[name^="q_"]').forEach(input => {
+            localStorage.removeItem(`answer_${input.name}`);
+        });
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Yuborilmoqda...';
+
+        const formData = new FormData(this);
+
+        fetch(`/attempts/submit/{{ exam.id }}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert('Xatolik yuz berdi: ' + data.error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Javoblarni yuborish';
+            }
+        })
+        .catch(error => {
+            alert('Xatolik yuz berdi: ' + error);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Javoblarni yuborish';
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        renderQuestions();
+        showPassage(0);
+
+        const passageContents = document.querySelectorAll('.passage-content');
+        passageContents.forEach(content => {
+            content.addEventListener('mouseup', function (e) {
+                const selection = window.getSelection();
+                const selectedText = selection.toString();
+                if (selectedText.length > 0) {
+                    const range = selection.getRangeAt(0);
+                    const span = document.createElement('span');
+                    span.className = 'bg-yellow-200 dark:bg-yellow-800';
+                    try {
+                        range.surroundContents(span);
+                    } catch (err) {
+                        console.log('Selection spans multiple elements or is invalid:', err);
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

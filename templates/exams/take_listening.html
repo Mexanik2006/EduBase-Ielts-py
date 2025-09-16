@@ -1,0 +1,765 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.title }} - Listening{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Custom light/dark mode classes for this page, consistent with other pages */
+    .light .bg-card {
+        background-color: #FFFFFF;
+    }
+
+    .dark .bg-card {
+        background-color: #1A1A1A;
+    }
+
+    .light .border-card {
+        border-color: #E0E0E0;
+    }
+
+    .dark .border-card {
+        border-color: #333333;
+    }
+
+    .light .text-on-card {
+        color: #000000;
+    }
+
+    .dark .text-on-card {
+        color: #FFFFFF;
+    }
+
+    .light .text-subtle {
+        color: #555555;
+    }
+
+    .dark .text-subtle {
+        color: #AAAAAA;
+    }
+
+    .passage-content p {
+        margin-bottom: 1rem;
+    }
+
+    .passage-content h1,
+    .passage-content h2,
+    .passage-content h3 {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+</style>
+
+
+<div class="py-6">
+  <div class="px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ exam.title }} - Listening</h1>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Listening bo'limi testi</p>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <span id="currentAudioText">Audio 1</span> of {{ exam.listening_audios.count }}
+        </p>
+      </div>
+    </div>
+
+    <form id="examForm" method="post" class="space-y-6">
+      {% csrf_token %}
+
+      <!-- Added navigation controls identical to reading exam -->
+      <div class="flex justify-between items-center mb-4">
+        <button type="button" id="prevAudioBtn"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fas fa-chevron-left mr-2"></i> Oldingi audio
+        </button>
+
+        <div class="flex space-x-2">
+          {% for audio in exam.listening_audios.all %}
+          <button type="button"
+            class="audio-indicator w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 text-sm font-medium focus:outline-none"
+            data-audio="{{ forloop.counter0 }}">
+            {{ forloop.counter }}
+          </button>
+          {% endfor %}
+        </div>
+
+        <button type="button" id="nextAudioBtn"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+          Keyingi audio <i class="fas fa-chevron-right ml-2"></i>
+        </button>
+      </div>
+
+      <div class="flex gap-6">
+        <!-- Audio sections with same structure as reading passages -->
+        <div class="flex-[5] space-y-6">
+          {% for audio in exam.listening_audios.all %}
+          <div class="audio-container" data-audio="{{ forloop.counter0 }}"
+            style="{% if not forloop.first %}display: none;{% endif %}">
+            <div
+              class="bg-white dark:bg-black shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800">
+              <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Audio {{ forloop.counter }}</h3>
+                {% if audio.title %}
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ audio.title }}</p>
+                {% endif %}
+                {% if audio.time %}
+                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Vaqt: {{ audio.time }} daqiqa</p>
+                {% endif %}
+              </div>
+              <div class="p-6">
+                <audio controls class="w-full mb-4" data-duration="{{ audio.duration|default:0 }}">
+                  <source src="{{ audio.audio_file.url }}" type="audio/mpeg">
+                  Your browser does not support the audio element.
+                </audio>
+
+                {% if audio.transcript %}
+                <details class="mt-4">
+                  <summary
+                    class="text-sm font-medium text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400">
+                    Transcript (for reference)
+                  </summary>
+                  <div
+                    class="mt-3 prose prose-sm max-w-none text-gray-600 dark:text-gray-300 whitespace-pre-line select-text"
+                    style="user-select: text; -webkit-user-select: text; -moz-user-select: text;">
+                    {{ audio.transcript }}
+                  </div>
+                </details>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Questions section with same structure as reading -->
+        <div class="flex-1 lg:flex-[4] space-y-6">
+          {% for audio in exam.listening_audios.all %}
+          <div class="questions-container" data-audio="{{ forloop.counter0 }}"
+            style="{% if not forloop.first %}display: none;{% endif %}">
+            {% for question in audio.questions.all %}
+
+            <div
+              class="bg-card shadow rounded-lg overflow-hidden border border-card">
+              <div class="p-4 border-b border-card">
+                <h3 class="text-base font-semibold text-text-on-card">
+                  Question {{ question.start_number }}–{{ question.end_number }}
+                </h3>
+              </div>
+              <div class="p-6 text-sm text-subtle space-y-3">
+                {% if question.question_type == 'true_false_not_given' %}
+                <p class="font-medium text-text-on-card">
+                  Do the following statements agree with the information given in
+                  {{ exam.get_section_type_display }} Passage {{ forloop.parentloop.counter }}?
+                </p>
+                <p>In boxes {{ question.start_number }}–{{ question.end_number }} on your answer sheet, choose</p>
+                <ul class="list-disc pl-6 space-y-1">
+                  <li><span class="font-semibold text-text-on-card">TRUE</span> – if the statement agrees with the
+                    information</li>
+                  <li><span class="font-semibold text-text-on-card">FALSE</span> – if the statement contradicts the
+                    information</li>
+                  <li><span class="font-semibold text-text-on-card">NOT GIVEN</span> – if there is no information on
+                    this</li>
+                </ul>
+
+                {% elif question.question_type == 'yes_no_not_given' %}
+                <p class="font-medium text-text-on-card">
+                  Do the following statements agree with the information given in
+                  {{ exam.get_section_type_display }} Passage {{ forloop.parentloop.counter }}?
+                </p>
+                <p>In boxes {{ question.start_number }}–{{ question.end_number }} on your answer sheet, choose</p>
+                <ul class="list-disc pl-6 space-y-1">
+                  <li><span class="font-semibold text-text-on-card">YES</span> – if the statement agrees with the
+                    information</li>
+                  <li><span class="font-semibold text-text-on-card">NO</span> – if the statement contradicts the
+                    information</li>
+                  <li><span class="font-semibold text-text-on-card">NOT GIVEN</span> – if there is no information on
+                    this</li>
+                </ul>
+
+                {% elif question.question_type == 'mcq' %}
+                <p class="font-medium text-text-on-card">Choose the correct letter, A, B, C or D.</p>
+                <p>Write the correct letter in boxes {{ question.start_number }}–{{ question.end_number }} on your
+                  answer sheet.</p>
+                {% elif question.question_type == 'mcq_multiple_answer' %}
+                <p class="font-medium text-text-on-card">Choose the correct letters, A, B, C or D.</p>
+                <p class="text-sm font-medium text-yellow-600 dark:text-yellow-400">You may choose more than one answer.
+                </p>
+                <p>Write the correct letters in boxes {{ question.start_number }}–{{ question.end_number }} on your
+                  answer sheet.</p>
+                {% elif question.question_type == 'matching_information' %}
+                {% with opts=question.subquestions.first.options_list %}
+                {% with opts_clean=opts|cut:" " %}
+                <p class="font-medium text-text-on-card">
+                  {{ exam.get_section_type_display }} Passage {{ forloop.parentloop.counter }}
+                  has {{ question.subquestions.first.section_count }} sections,
+                  {{ question.subquestions.first.options_list|slice:":1" }}–
+                  {{ question.subquestions.first.options_list|slice:"-1:" }}.
+                </p>
+                {% endwith %}
+                {% endwith %}
+                <p>Which section contains the following information?</p>
+                <p>Choose the correct letter in boxes {{ question.start_number }}–{{ question.end_number }} on your
+                  answer sheet.</p>
+                <p><span class="font-semibold text-text-on-card">NB:</span> You may use any letter more than once.</p>
+                {% elif question.question_type == 'matching_headings' %}
+                {% with opts=question.subquestions.first.options_list %}
+                <p>Look at the following statements (Questions
+                  {{ question.start_number }}–{{ question.end_number }}) and the list of people below.</p>
+                <p class="font-medium text-text-on-card">
+                  Match each statement with the correct person,
+                  {{ question.subquestions.first.options_list|slice:":1" }}–
+                  {{ question.subquestions.first.options_list|slice:"-1:" }}.
+                </p>
+                {% endwith %}
+                <p>Choose the correct letter, A-C, in boxes {{ question.start_number }}–{{ question.end_number }} on
+                  your answer sheet.</p>
+                <p><span class="font-semibold text-text-on-card">NB:</span> You may use any letter more than once.</p>
+                {% elif question.question_type == 'one_word_and_or_a_number' or question.question_type == 'one_word_only' or question.question_type == 'no_word_and_or_a_number'%}
+                <p class="font-medium text-text-on-card">Complete the notes below.</p>
+                <p>
+                  {% if question.question_type == 'one_word_and_or_a_number' %}
+                  Choose <span class="font-semibold text-text-on-card">ONE WORD AND/OR A NUMBER</span> from the passage
+                  for each answer.
+                  {% elif question.question_type == 'one_word_and_or_a_number' %}
+                  Choose <span class="font-semibold text-text-on-card">ONE WORD ONLY</span> from the passage for each
+                  answer.
+                  {% elif question.question_type == 'no_word_and_or_a_number' %}
+                  Choose <span class="font-semibold text-text-on-card">NO MORE THAN TWO/THREE WORDS OR A NUMBER</span> from the passage for each answer.
+                  {% endif %}
+                </p>
+                <p>
+                  Write your answers in boxes {{ question.start_number }}–{{ question.end_number }} on your answer
+                  sheet.
+                </p>
+                {% endif %}
+              </div>
+
+
+              {% if question.question_type == 'matching_headings' %}
+              {% with subq=question.subquestions.first %}
+              {% if subq %}
+              <div class="bg-card shadow rounded-lg overflow-hidden border border-card p-6 space-y-4">
+                {% if subq.title %}
+                <h4 class="font-semibold text-lg text-text-on-card">
+                  {{ subq.title }}
+                </h4>
+                {% endif %}
+
+                {% if subq.options_list %}
+                <ul class="list-decimal list-inside space-y-2 text-sm text-subtle">
+                  {% for opt in subq.options_list.splitlines %}
+                  <li
+                    class="px-3 py-2 border border-card rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                    {{ opt }}
+                  </li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+              </div>
+              {% endif %}
+              {% endwith %}
+              {% endif %}
+            </div>
+
+            <div class="question-container p-6 border-t border-card" data-question-type="{{ question.question_type }}"
+              data-question-id="{{ question.id }}" data-start-number="{{ question.start_number }}">
+              {% for subquestion in question.subquestions.all %}
+              <div class="subquestion-data" data-subquestion-id="{{ subquestion.id }}"
+                data-subquestion-text="{{ subquestion.text }}" data-choice-a="{{ subquestion.choice_a|default:'' }}"
+                data-choice-b="{{ subquestion.choice_b|default:'' }}"
+                data-choice-c="{{ subquestion.choice_c|default:'' }}"
+                data-choice-d="{{ subquestion.choice_d|default:'' }}"
+                data-choice-e="{{ subquestion.choice_e|default:'' }}"
+                data-choice-f="{{ subquestion.choice_f|default:'' }}"
+                data-options-list="{{ subquestion.options_list|default:'' }}"
+                data-title="{{ subquestion.title|default:'' }}" style="display: none;">
+              </div>
+              {% endfor %}
+            </div>
+
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Submit button container identical to reading exam -->
+      <div class="text-center" id="submitButtonContainer" style="display: none;">
+        <button type="submit"
+          class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+          <i class="fas fa-paper-plane mr-2"></i> Javoblarni yuborish
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  let currentAudio = 0;
+  const totalAudios = {{ exam.listening_audios.count }};
+
+  function showAudio(audioIndex) {
+    document.querySelectorAll('.audio-container, .questions-container').forEach(container => {
+      container.style.display = 'none';
+    });
+
+    const audioContainer = document.querySelector(`[data-audio="${audioIndex}"].audio-container`);
+    const questionsContainer = document.querySelector(`[data-audio="${audioIndex}"].questions-container`);
+
+    if (audioContainer) audioContainer.style.display = 'block';
+    if (questionsContainer) questionsContainer.style.display = 'block';
+
+    document.getElementById('currentAudioText').textContent = `Audio ${audioIndex + 1}`;
+
+    const prevBtn = document.getElementById('prevAudioBtn');
+    const nextBtn = document.getElementById('nextAudioBtn');
+    const submitContainer = document.getElementById('submitButtonContainer');
+
+    prevBtn.disabled = audioIndex === 0;
+
+    if (audioIndex === totalAudios - 1) {
+      nextBtn.style.display = 'none';
+      submitContainer.style.display = 'block';
+    } else {
+      nextBtn.style.display = 'inline-flex';
+      submitContainer.style.display = 'none';
+    }
+
+    document.querySelectorAll('.audio-indicator').forEach((indicator, index) => {
+      if (index === audioIndex) {
+        indicator.classList.add('bg-black', 'text-white', 'dark:bg-white', 'dark:text-black');
+        indicator.classList.remove('border-gray-300', 'dark:border-gray-600');
+      } else {
+        indicator.classList.remove('bg-black', 'text-white', 'dark:bg-white', 'dark:text-black');
+        indicator.classList.add('border-gray-300', 'dark:border-gray-600');
+      }
+    });
+
+    currentAudio = audioIndex;
+  }
+
+  document.getElementById('prevAudioBtn').addEventListener('click', () => {
+    if (currentAudio > 0) {
+      showAudio(currentAudio - 1);
+    }
+  });
+
+  document.getElementById('nextAudioBtn').addEventListener('click', () => {
+    if (currentAudio < totalAudios - 1) {
+      showAudio(currentAudio + 1);
+    }
+  });
+
+  document.querySelectorAll('.audio-indicator').forEach(indicator => {
+    indicator.addEventListener('click', () => {
+      const audioIndex = parseInt(indicator.dataset.audio);
+      showAudio(audioIndex);
+    });
+  });
+
+  function renderQuestions() {
+    const questionContainers = document.querySelectorAll('.question-container');
+
+    questionContainers.forEach(container => {
+      const questionType = container.dataset.questionType;
+      const questionId = container.dataset.questionId;
+      const startNumber = parseInt(container.dataset.startNumber);
+      const subquestions = container.querySelectorAll('.subquestion-data');
+
+      container.innerHTML = '';
+
+      const separateDivTypes = [
+        'true_false_not_given',
+        'yes_no_not_given',
+        'matching_information',
+        'matching_headings',
+        'matching_features',
+        'matching_sentence_endings',
+        'mcq',
+        'mcq_multiple_answer',
+        'fill_blank',
+        'short_answer',
+        'sentence_completion',
+        'summary_completion',
+        'note_completion',
+        'table_completion',
+        'flow_chart_completion',
+        'diagram_labelling'
+      ];
+
+      const singleDivTypes = [
+        'one_word_and_or_a_number',
+        'one_word_only',
+        'no_more_than_two_words',
+        'no_more_than_three_words',
+        'no_word_and_or_a_number',
+        'choose_from_list'
+      ];
+
+      if (separateDivTypes.includes(questionType)) {
+        subquestions.forEach((subquestionData, index) => {
+          const subquestionDiv = document.createElement('div');
+          subquestionDiv.className = 'bg-card shadow rounded-lg overflow-hidden border border-card mb-4';
+
+          const subquestionId = subquestionData.dataset.subquestionId;
+          const subquestionText = subquestionData.dataset.subquestionText;
+          const questionNumber = startNumber + index;
+
+          let content = `
+                        <div class="p-4 border-b border-card">
+                            <h4 class="text-sm font-medium text-text-on-card">
+                                ${questionNumber}. ${subquestionText}
+                            </h4>
+                        </div>
+                        <div class="p-4">
+                    `;
+
+          if (questionType === 'mcq') {
+            content += '<div class="space-y-2">';
+            ['a', 'b', 'c', 'd'].forEach(choice => {
+              const choiceText = subquestionData.dataset[`choice${choice.toUpperCase()}`];
+              if (choiceText && choiceText.trim()) {
+                content += `
+                                    <div class="flex items-center">
+                                        <input type="radio" name="q_${subquestionId}" value="${choice.toUpperCase()}" id="q${subquestionId}_${choice}"
+                                            class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                        <label for="q${subquestionId}_${choice}" class="ml-3 block text-sm text-subtle">${choice.toUpperCase()}) ${choiceText}</label>
+                                    </div>
+                                `;
+              }
+            });
+            content += '</div>';
+          } else if (questionType === 'mcq_multiple_answer') {
+            const optionsList = subquestionData.dataset.optionsList || '';
+            content += '<div class="space-y-2">';
+
+            if (optionsList && optionsList.trim()) {
+              const options = optionsList.split('\n').filter(opt => opt.trim());
+              options.forEach((option, optIndex) => {
+                const optionLetter = String.fromCharCode(65 + optIndex);
+                content += `
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="q_${subquestionId}[]" value="${optionLetter}" id="q${subquestionId}_${optionLetter.toLowerCase()}"
+                                            class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800 rounded">
+                                        <label for="q${subquestionId}_${optionLetter.toLowerCase()}" class="ml-3 block text-sm text-subtle">${optionLetter}) ${option.trim()}</label>
+                                    </div>
+                                `;
+              });
+            } else {
+              ['a', 'b', 'c', 'd', 'e', 'f'].forEach(choice => {
+                const choiceText = subquestionData.dataset[`choice${choice.toUpperCase()}`];
+                if (choiceText && choiceText.trim()) {
+                  content += `
+                                        <div class="flex items-center">
+                                            <input type="checkbox" name="q_${subquestionId}[]" value="${choice.toUpperCase()}" id="q${subquestionId}_${choice}"
+                                                class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800 rounded">
+                                            <label for="q${subquestionId}_${choice}" class="ml-3 block text-sm text-subtle">${choice.toUpperCase()}) ${choiceText}</label>
+                                        </div>
+                                    `;
+                }
+              });
+            }
+            content += '</div>';
+          } else if (['matching_information', 'matching_headings', 'matching_features', 'matching_sentence_endings'].includes(questionType)) {
+            const firstSubquestion = subquestions[0];
+            const optionsList = firstSubquestion ? firstSubquestion.dataset.optionsList : subquestionData.dataset.optionsList;
+
+            if (optionsList && optionsList.trim()) {
+              const options = optionsList.split('\n').filter(opt => opt.trim());
+              content += `
+                                <div class="mb-2">
+                                    <select name="q_${subquestionId}"
+                                        class="block w-full px-3 py-2 border border-card rounded-md shadow-sm focus:outline-none focus:ring-text-on-card focus:border-text-on-card bg-card text-text-on-card sm:text-sm">
+                                        <option value="" disabled selected>Javobni tanlang</option>
+                            `;
+              options.forEach((option, optIndex) => {
+                const optionLetter = String.fromCharCode(65 + optIndex);
+                content += `<option value="${optionLetter}">${optionLetter}) ${option.trim()}</option>`;
+              });
+              content += '</select></div>';
+            } else {
+              content += `
+                                <div class="mb-2">
+                                    <select name="q_${subquestionId}"
+                                        class="block w-full px-3 py-2 border border-card rounded-md shadow-sm focus:outline-none focus:ring-text-on-card focus:border-text-on-card bg-card text-text-on-card sm:text-sm">
+                                        <option value="" disabled selected>Javobni tanlang</option>
+                            `;
+              for (let i = 0; i < 8; i++) {
+                const optionLetter = String.fromCharCode(65 + i);
+                content += `<option value="${optionLetter}">${optionLetter}</option>`;
+              }
+              content += '</select></div>';
+            }
+          } else if (questionType === 'true_false_not_given') {
+            content += `
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${subquestionId}" value="TRUE" id="q${subquestionId}_true"
+                                        class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                    <label for="q${subquestionId}_true" class="ml-3 block text-sm text-subtle">TRUE</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${subquestionId}" value="FALSE" id="q${subquestionId}_false"
+                                        class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                    <label for="q${subquestionId}_false" class="ml-3 block text-sm text-subtle">FALSE</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${subquestionId}" value="NOT GIVEN" id="q${subquestionId}_ng"
+                                        class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                    <label for="q${subquestionId}_ng" class="ml-3 block text-sm text-subtle">NOT GIVEN</label>
+                                </div>
+                            </div>
+                        `;
+          } else if (questionType === 'yes_no_not_given') {
+            content += `
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${subquestionId}" value="YES" id="q${subquestionId}_yes"
+                                        class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                    <label for="q${subquestionId}_yes" class="ml-3 block text-sm text-subtle">YES</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${subquestionId}" value="NO" id="q${subquestionId}_no"
+                                        class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                    <label for="q${subquestionId}_no" class="ml-3 block text-sm text-subtle">NO</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${subquestionId}" value="NOT GIVEN" id="q${subquestionId}_ng"
+                                        class="h-4 w-4 text-black focus:ring-black border-card dark:border-card dark:bg-gray-800">
+                                    <label for="q${subquestionId}_ng" class="ml-3 block text-sm text-subtle">NOT GIVEN</label>
+                                </div>
+                            </div>
+                        `;
+          } else if (['fill_blank', 'short_answer', 'sentence_completion', 'summary_completion', 'note_completion', 'table_completion', 'flow_chart_completion', 'diagram_labelling'].includes(questionType)) {
+            content += `
+                            <input type="text" name="q_${subquestionId}"
+                                class="mt-1 block w-full px-3 py-2 border border-card rounded-md shadow-sm focus:outline-none focus:ring-text-on-card focus:border-text-on-card bg-card text-text-on-card sm:text-sm"
+                                placeholder="Javobingizni kiriting">
+                        `;
+          }
+
+          content += '</div></div>';
+          subquestionDiv.innerHTML = content;
+          container.appendChild(subquestionDiv);
+        });
+
+      } else if (singleDivTypes.includes(questionType)) {
+        const singleDiv = document.createElement('div');
+        singleDiv.className = 'bg-card shadow rounded-lg overflow-hidden border border-card';
+
+        let content = '<div class="p-6 space-y-4">';
+
+        const firstSubquestion = subquestions[0];
+        if (firstSubquestion && firstSubquestion.dataset.title) {
+          content += `
+                        <h4 class="text-sm font-semibold text-text-on-card">
+                            ${firstSubquestion.dataset.title}
+                        </h4>
+                    `;
+        }
+
+        content += '<div class="space-y-3">';
+
+        subquestions.forEach((subquestionData, index) => {
+          const subquestionId = subquestionData.dataset.subquestionId;
+          const subquestionText = subquestionData.dataset.subquestionText;
+          const questionNumber = startNumber + index;
+
+          content += `
+                        <div class="flex items-start space-x-3">
+                            <span class="text-sm font-medium text-text-on-card min-w-[2rem]">
+                                ${questionNumber}.
+                            </span>
+                            <div class="flex-1">
+                    `;
+
+          if (subquestionText.includes('__________')) {
+            const parts = subquestionText.split('__________');
+            content += `
+                            <div class="text-sm text-subtle flex items-center flex-wrap">
+                                <span>${parts[0]}</span>
+                                <input type="text" name="q_${subquestionId}"
+                                class="inline-block w-32 px-2 py-1 mx-1 border border-card rounded-md focus:border-text-on-card focus:outline-none bg-transparent text-center"
+                                placeholder="...">
+
+                                <span>${parts[1] || ''}</span>
+                            </div>
+                        `;
+          } else if (['choose_from_list'].includes(questionType)) {
+            const optionsList = subquestionData.dataset.optionsList || '';
+            if (optionsList && optionsList.trim()) {
+              const options = optionsList.split('\n').filter(opt => opt.trim());
+              content += `
+                                <div class="text-sm text-subtle mb-2">
+                                    ${subquestionText}
+                                </div>
+                                <select name="q_${subquestionId}"
+                                    class="block w-full px-3 py-2 border border-card rounded-md shadow-sm focus:outline-none focus:ring-text-on-card focus:border-text-on-card bg-card text-text-on-card sm:text-sm">
+                                    <option value="" disabled selected>Ro'yxatdan tanlang</option>
+                            `;
+              options.forEach((option, optIndex) => {
+                content += `<option value="${option.trim()}">${option.trim()}</option>`;
+              });
+              content += '</select>';
+            }
+          } else {
+            content += `
+                            <div class="text-sm text-subtle">
+                                ${subquestionText}
+                                <input type="text" name="q_${subquestionId}"
+                                    class="inline-block w-32 px-2 py-1 ml-2 border-b border-card focus:border-text-on-card focus:outline-none bg-transparent text-center"
+                                    placeholder="...">
+                            </div>
+                        `;
+          }
+
+          content += '</div></div>';
+        });
+
+        content += '</div></div>';
+        singleDiv.innerHTML = content;
+        container.appendChild(singleDiv);
+      }
+    });
+
+    initializeInputEventListeners();
+  }
+
+  function initializeInputEventListeners() {
+    document.querySelectorAll('input[type="radio"], input[type="text"], input[type="checkbox"]').forEach(input => {
+      input.removeEventListener('change', saveAnswer);
+      input.removeEventListener('input', saveAnswer);
+
+      const savedValue = localStorage.getItem(`answer_${input.name}`);
+      if (savedValue) {
+        if (input.type === 'radio' && input.value === savedValue) {
+          input.checked = true;
+        } else if (input.type === 'checkbox') {
+          const savedValues = JSON.parse(savedValue || '[]');
+          if (savedValues.includes(input.value)) {
+            input.checked = true;
+          }
+        } else if (input.type === 'text') {
+          input.value = savedValue;
+        }
+      }
+
+      input.addEventListener('change', saveAnswer);
+      input.addEventListener('input', saveAnswer);
+    });
+  }
+
+  function saveAnswer() {
+    if (this.type === 'checkbox') {
+      const checkboxes = document.querySelectorAll(`input[name="${this.name}"]:checked`);
+      const values = Array.from(checkboxes).map(cb => cb.value);
+      localStorage.setItem(`answer_${this.name}`, JSON.stringify(values));
+    } else {
+      localStorage.setItem(`answer_${this.name}`, this.value);
+    }
+  }
+
+  let totalTime = 30;
+  const audioElements = document.querySelectorAll('audio');
+
+  // // Calculate total duration from all audio files
+  // audioElements.forEach(audio => {
+  //   const duration = parseFloat(audio.dataset.duration) || 0;
+  //   if (duration > 0) {
+  //     totalTime += Math.ceil(duration / 60); // Convert seconds to minutes
+  //   }
+  // });
+
+  // // If no durations available, use default time from audio objects
+  // if (totalTime === 0) {
+  //   {% for audio in exam.listening_audios.all %}
+  //   totalTime += {{ audio.time |default: 5 }
+  // };
+  // {% endfor %}
+  // }
+
+  // Multiply by 2 as requested
+  totalTime = totalTime * 2;
+
+  let timeLeft = localStorage.getItem('examTimeLeft_{{ exam.id }}') || (totalTime * 60);
+  timeLeft = parseInt(timeLeft);
+
+  if (!localStorage.getItem('examStartTime_{{ exam.id }}')) {
+    localStorage.setItem('examStartTime_{{ exam.id }}', Date.now());
+  }
+
+  function updateTimer() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+
+    const navbarTimer = document.getElementById('examTimeLeft');
+    if (navbarTimer) {
+      navbarTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    if (timeLeft <= 0) {
+      document.getElementById('examForm').submit();
+      return;
+    }
+
+    timeLeft--;
+    localStorage.setItem('examTimeLeft_{{ exam.id }}', timeLeft);
+  }
+
+  setInterval(updateTimer, 1000);
+  updateTimer();
+
+  document.getElementById('examForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    localStorage.removeItem('examTimeLeft_{{ exam.id }}');
+    localStorage.removeItem('examStartTime_{{ exam.id }}');
+
+    document.querySelectorAll('input[name^="q_"]').forEach(input => {
+      localStorage.removeItem(`answer_${input.name}`);
+    });
+
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Yuborilmoqda...';
+
+    const formData = new FormData(this);
+
+    fetch(`/attempts/submit/{{ exam.id }}/`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = data.redirect_url;
+        } else {
+          alert('Xatolik yuz berdi: ' + data.error);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Javoblarni yuborish';
+        }
+      })
+      .catch(error => {
+        alert('Xatolik yuz berdi: ' + error);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Javoblarni yuborish';
+      });
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    renderQuestions();
+    showAudio(0);
+
+    const audioContents = document.querySelectorAll('audio');
+    audioContents.forEach(audio => {
+      audio.addEventListener('loadedmetadata', function () {
+        // Update duration data attribute when audio loads
+        this.dataset.duration = this.duration;
+      });
+    });
+  });
+</script>
+{% endblock %}

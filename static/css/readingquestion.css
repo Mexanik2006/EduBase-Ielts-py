@@ -1,0 +1,37 @@
+/* static/css/readingquestion.css */
+.reading-subquestion-inline .field-choice_a,
+.reading-subquestion-inline .field-choice_b,
+.reading-subquestion-inline .field-choice_c,
+.reading-subquestion-inline .field-choice_d {
+    display: none;
+}
+
+.reading-subquestion-inline.mcq .field-choice_a,
+.reading-subquestion-inline.mcq .field-choice_b,
+.reading-subquestion-inline.mcq .field-choice_c,
+.reading-subquestion-inline.mcq .field-choice_d {
+    display: block;
+}
+
+/* Sarlavhani bitta qilish uchun */
+.djn-group[data-inline-model="exams-readingsubquestion"] .djn-inline-form h3.djn-drag-handler:only-of-type {
+    display: block;
+}
+
+/* True/False uchun maxsus stillar */
+.reading-subquestion-inline.true_false input[id*="-correct_answer"]::placeholder {
+    color: #888;
+    font-style: italic;
+}
+
+/* MCQ uchun maxsus stillar */
+.reading-subquestion-inline.mcq input[id*="-correct_answer"]::placeholder {
+    color: #888;
+    font-style: italic;
+}
+
+/* Fill in the blank uchun maxsus stillar */
+.reading-subquestion-inline.fill_blank input[id*="-correct_answer"]::placeholder {
+    color: #888;
+    font-style: italic;
+}

@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+
+{% block title %}Testlar - EduBase{% endblock %}
+
+{% block content %}
+<style>
+    /* Custom light/dark mode classes for this page */
+    .light .bg-card {
+        background-color: #FFFFFF;
+    }
+    .dark .bg-card {
+        background-color: #1A1A1A;
+    }
+    .light .border-card {
+        border-color: #E0E0E0;
+    }
+    .dark .border-card {
+        border-color: #333333;
+    }
+    .light .text-on-card {
+        color: #000000;
+    }
+    .dark .text-on-card {
+        color: #FFFFFF;
+    }
+    .light .text-subtle {
+        color: #555555;
+    }
+    .dark .text-subtle {
+        color: #AAAAAA;
+    }
+    /* Buttons colors */
+    .btn-active {
+        background-color: #000000;
+        color: #FFFFFF;
+        border-color: #000000;
+    }
+    .dark .btn-active {
+        background-color: #FFFFFF;
+        color: #000000;
+        border-color: #FFFFFF;
+    }
+    .btn-inactive {
+        background-color: #FFFFFF;
+        color: #555555;
+        border-color: #E0E0E0;
+    }
+    .dark .btn-inactive {
+        background-color: #1A1A1A;
+        color: #AAAAAA;
+        border-color: #333333;
+    }
+    .btn-inactive:hover {
+        background-color: #F7F7F7;
+    }
+    .dark .btn-inactive:hover {
+        background-color: #222222;
+    }
+</style>
+
+<div class="">
+    <div class="px-4 sm:px-0">
+        <h1 class="text-3xl font-bold text-text-on-card">Mavjud testlar</h1>
+        <p class="mt-2 text-subtle">Sizga tayinlangan barcha testlar</p>
+    </div>
+
+    <div class="mt-6 px-4 sm:px-0 space-y-4">
+        <div class="flex flex-wrap gap-2">
+            <button onclick="filterStatus('all', event)" class="status-btn px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 btn-active">
+                Barcha testlar
+            </button>
+            <button onclick="filterStatus('new', event)" class="status-btn px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 btn-inactive">
+                Yangi testlar
+            </button>
+            <button onclick="filterStatus('completed', event)" class="status-btn px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 btn-inactive">
+                Ishlangan testlar
+            </button>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            <button onclick="filterSection('all', event)" class="section-btn px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 btn-active">
+                Barchasi
+            </button>
+            <button onclick="filterSection('reading', event)" class="section-btn px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 btn-inactive">
+                Reading
+            </button>
+            <button onclick="filterSection('listening', event)" class="section-btn px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 btn-inactive">
+                Listening
+            </button>
+            <button onclick="filterSection('writing', event)" class="section-btn px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 btn-inactive">
+                Writing
+            </button>
+            <button onclick="filterSection('speaking', event)" class="section-btn px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 btn-inactive">
+                Speaking
+            </button>
+        </div>
+    </div>
+
+    <div class="mt-8 px-4 sm:px-0">
+        <div id="exam-container" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {% for exam_info in exam_data %}
+            <div
+                class="exam-card bg-card border border-card rounded-xl p-6 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+                data-type="{{ exam_info.assignment.exam.section_type }}" data-status="{{ exam_info.status }}">
+
+                <div class="flex items-start justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-text-on-card leading-tight">
+                        {{ exam_info.assignment.exam.title }}
+                    </h3>
+                    <div class="flex flex-col items-end gap-2">
+                        {% if exam_info.status == 'completed' %}
+                        <span
+                            class="px-2 py-1 text-xs font-medium rounded-full bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-200">
+                            Ishlangan
+                        </span>
+                        {% else %}
+                        <span
+                            class="px-2 py-1 text-xs font-medium rounded-full bg-blue-200 text-blue-800 dark:bg-blue-700 dark:text-blue-200">
+                            Yangi
+                        </span>
+                        {% endif %}
+
+                        <span class="px-3 py-1 text-xs font-medium rounded-full shrink-0 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                            {{ exam_info.assignment.exam.get_section_type_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <p class="text-sm text-subtle mb-6 leading-relaxed">
+                    {{ exam_info.assignment.exam.description|truncatewords:15 }}
+                </p>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center text-sm text-subtle">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        {{ exam_info.assignment.exam.time_limit }} daqiqa
+                    </div>
+
+                    {% if exam_info.status == 'completed' %}
+                    <a href="{% url 'exam_detail' exam_info.assignment.exam.id %}"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 rounded-lg transition-colors duration-200">
+                        Natijani ko'rish
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'exam_detail' exam_info.assignment.exam.id %}"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-black hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 rounded-lg transition-colors duration-200">
+                        Boshlash
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full">
+                <div class="text-center py-16">
+                    <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                        </path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-text-on-card mb-2">Testlar topilmadi</h3>
+                    <p class="text-subtle">Hozircha sizga tayinlangan testlar yo'q.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div id="no-results" class="hidden text-center py-16">
+            <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-text-on-card mb-2">Ma'lumot topilmadi</h3>
+            <p class="text-subtle">Tanlangan kategoriyada testlar mavjud emas.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentStatus = 'all';
+    let currentSection = 'all';
+    let allExams = [];
+
+    document.addEventListener('DOMContentLoaded', function () {
+        allExams = Array.from(document.querySelectorAll('.exam-card'));
+        console.log('[v0] Loaded', allExams.length, 'exams');
+    });
+
+    function filterStatus(status, event) {
+        currentStatus = status;
+        updateButtonStates('.status-btn', event.currentTarget);
+        applyFilters();
+    }
+
+    function filterSection(section, event) {
+        currentSection = section;
+        updateButtonStates('.section-btn', event.currentTarget);
+        applyFilters();
+    }
+
+    function updateButtonStates(selector, activeButton) {
+        document.querySelectorAll(selector).forEach(btn => {
+            btn.classList.remove('btn-active');
+            btn.classList.add('btn-inactive');
+        });
+        activeButton.classList.remove('btn-inactive');
+        activeButton.classList.add('btn-active');
+    }
+
+    function applyFilters() {
+        let visibleCount = 0;
+
+        allExams.forEach(exam => {
+            const statusMatch = (currentStatus === 'all' || exam.dataset.status === currentStatus);
+            const sectionMatch = (currentSection === 'all' || exam.dataset.type === currentSection);
+            const shouldShow = statusMatch && sectionMatch;
+
+            exam.style.display = shouldShow ? 'block' : 'none';
+            if (shouldShow) visibleCount++;
+        });
+
+        const noResults = document.getElementById('no-results');
+        if (visibleCount === 0) {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+
+        console.log('[v0] Filtered:', visibleCount, 'visible exams');
+    }
+</script>
+{% endblock %}

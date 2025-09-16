@@ -1,0 +1,1175 @@
+[
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "admin",
+        "model": "logentry"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "auth",
+        "model": "permission"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "auth",
+        "model": "group"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "auth",
+        "model": "user"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "contenttypes",
+        "model": "contenttype"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "sessions",
+        "model": "session"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "accounts",
+        "model": "profile"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "exams",
+        "model": "exam"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "exams",
+        "model": "listeningaudio"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "exams",
+        "model": "listeningquestion"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "exams",
+        "model": "readingpassage"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "exams",
+        "model": "readingquestion"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "exams",
+        "model": "speakingpart"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "exams",
+        "model": "writingtask"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "exams",
+        "model": "examassignment"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "exams",
+        "model": "speakingsubquestion"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "exams",
+        "model": "readingsubquestion"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "exams",
+        "model": "listeningsubquestion"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "groups",
+        "model": "group"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "groups",
+        "model": "groupstudent"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "attempts",
+        "model": "attempt"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "attempts",
+        "model": "review"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "attempts",
+        "model": "attemptaudio"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add log entry",
+        "content_type": [
+            "admin",
+            "logentry"
+        ],
+        "codename": "add_logentry"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change log entry",
+        "content_type": [
+            "admin",
+            "logentry"
+        ],
+        "codename": "change_logentry"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete log entry",
+        "content_type": [
+            "admin",
+            "logentry"
+        ],
+        "codename": "delete_logentry"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view log entry",
+        "content_type": [
+            "admin",
+            "logentry"
+        ],
+        "codename": "view_logentry"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add permission",
+        "content_type": [
+            "auth",
+            "permission"
+        ],
+        "codename": "add_permission"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change permission",
+        "content_type": [
+            "auth",
+            "permission"
+        ],
+        "codename": "change_permission"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete permission",
+        "content_type": [
+            "auth",
+            "permission"
+        ],
+        "codename": "delete_permission"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view permission",
+        "content_type": [
+            "auth",
+            "permission"
+        ],
+        "codename": "view_permission"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add group",
+        "content_type": [
+            "auth",
+            "group"
+        ],
+        "codename": "add_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change group",
+        "content_type": [
+            "auth",
+            "group"
+        ],
+        "codename": "change_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete group",
+        "content_type": [
+            "auth",
+            "group"
+        ],
+        "codename": "delete_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view group",
+        "content_type": [
+            "auth",
+            "group"
+        ],
+        "codename": "view_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add user",
+        "content_type": [
+            "auth",
+            "user"
+        ],
+        "codename": "add_user"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change user",
+        "content_type": [
+            "auth",
+            "user"
+        ],
+        "codename": "change_user"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete user",
+        "content_type": [
+            "auth",
+            "user"
+        ],
+        "codename": "delete_user"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view user",
+        "content_type": [
+            "auth",
+            "user"
+        ],
+        "codename": "view_user"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add content type",
+        "content_type": [
+            "contenttypes",
+            "contenttype"
+        ],
+        "codename": "add_contenttype"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change content type",
+        "content_type": [
+            "contenttypes",
+            "contenttype"
+        ],
+        "codename": "change_contenttype"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete content type",
+        "content_type": [
+            "contenttypes",
+            "contenttype"
+        ],
+        "codename": "delete_contenttype"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view content type",
+        "content_type": [
+            "contenttypes",
+            "contenttype"
+        ],
+        "codename": "view_contenttype"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add session",
+        "content_type": [
+            "sessions",
+            "session"
+        ],
+        "codename": "add_session"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change session",
+        "content_type": [
+            "sessions",
+            "session"
+        ],
+        "codename": "change_session"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete session",
+        "content_type": [
+            "sessions",
+            "session"
+        ],
+        "codename": "delete_session"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view session",
+        "content_type": [
+            "sessions",
+            "session"
+        ],
+        "codename": "view_session"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add profile",
+        "content_type": [
+            "accounts",
+            "profile"
+        ],
+        "codename": "add_profile"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change profile",
+        "content_type": [
+            "accounts",
+            "profile"
+        ],
+        "codename": "change_profile"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete profile",
+        "content_type": [
+            "accounts",
+            "profile"
+        ],
+        "codename": "delete_profile"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view profile",
+        "content_type": [
+            "accounts",
+            "profile"
+        ],
+        "codename": "view_profile"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add exam",
+        "content_type": [
+            "exams",
+            "exam"
+        ],
+        "codename": "add_exam"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change exam",
+        "content_type": [
+            "exams",
+            "exam"
+        ],
+        "codename": "change_exam"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete exam",
+        "content_type": [
+            "exams",
+            "exam"
+        ],
+        "codename": "delete_exam"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view exam",
+        "content_type": [
+            "exams",
+            "exam"
+        ],
+        "codename": "view_exam"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add listening audio",
+        "content_type": [
+            "exams",
+            "listeningaudio"
+        ],
+        "codename": "add_listeningaudio"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change listening audio",
+        "content_type": [
+            "exams",
+            "listeningaudio"
+        ],
+        "codename": "change_listeningaudio"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete listening audio",
+        "content_type": [
+            "exams",
+            "listeningaudio"
+        ],
+        "codename": "delete_listeningaudio"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view listening audio",
+        "content_type": [
+            "exams",
+            "listeningaudio"
+        ],
+        "codename": "view_listeningaudio"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add listening question",
+        "content_type": [
+            "exams",
+            "listeningquestion"
+        ],
+        "codename": "add_listeningquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change listening question",
+        "content_type": [
+            "exams",
+            "listeningquestion"
+        ],
+        "codename": "change_listeningquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete listening question",
+        "content_type": [
+            "exams",
+            "listeningquestion"
+        ],
+        "codename": "delete_listeningquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view listening question",
+        "content_type": [
+            "exams",
+            "listeningquestion"
+        ],
+        "codename": "view_listeningquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add reading passage",
+        "content_type": [
+            "exams",
+            "readingpassage"
+        ],
+        "codename": "add_readingpassage"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change reading passage",
+        "content_type": [
+            "exams",
+            "readingpassage"
+        ],
+        "codename": "change_readingpassage"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete reading passage",
+        "content_type": [
+            "exams",
+            "readingpassage"
+        ],
+        "codename": "delete_readingpassage"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view reading passage",
+        "content_type": [
+            "exams",
+            "readingpassage"
+        ],
+        "codename": "view_readingpassage"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add reading question",
+        "content_type": [
+            "exams",
+            "readingquestion"
+        ],
+        "codename": "add_readingquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change reading question",
+        "content_type": [
+            "exams",
+            "readingquestion"
+        ],
+        "codename": "change_readingquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete reading question",
+        "content_type": [
+            "exams",
+            "readingquestion"
+        ],
+        "codename": "delete_readingquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view reading question",
+        "content_type": [
+            "exams",
+            "readingquestion"
+        ],
+        "codename": "view_readingquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add speaking part",
+        "content_type": [
+            "exams",
+            "speakingpart"
+        ],
+        "codename": "add_speakingpart"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change speaking part",
+        "content_type": [
+            "exams",
+            "speakingpart"
+        ],
+        "codename": "change_speakingpart"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete speaking part",
+        "content_type": [
+            "exams",
+            "speakingpart"
+        ],
+        "codename": "delete_speakingpart"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view speaking part",
+        "content_type": [
+            "exams",
+            "speakingpart"
+        ],
+        "codename": "view_speakingpart"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add writing task",
+        "content_type": [
+            "exams",
+            "writingtask"
+        ],
+        "codename": "add_writingtask"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change writing task",
+        "content_type": [
+            "exams",
+            "writingtask"
+        ],
+        "codename": "change_writingtask"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete writing task",
+        "content_type": [
+            "exams",
+            "writingtask"
+        ],
+        "codename": "delete_writingtask"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view writing task",
+        "content_type": [
+            "exams",
+            "writingtask"
+        ],
+        "codename": "view_writingtask"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add exam assignment",
+        "content_type": [
+            "exams",
+            "examassignment"
+        ],
+        "codename": "add_examassignment"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change exam assignment",
+        "content_type": [
+            "exams",
+            "examassignment"
+        ],
+        "codename": "change_examassignment"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete exam assignment",
+        "content_type": [
+            "exams",
+            "examassignment"
+        ],
+        "codename": "delete_examassignment"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view exam assignment",
+        "content_type": [
+            "exams",
+            "examassignment"
+        ],
+        "codename": "view_examassignment"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add speaking sub question",
+        "content_type": [
+            "exams",
+            "speakingsubquestion"
+        ],
+        "codename": "add_speakingsubquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change speaking sub question",
+        "content_type": [
+            "exams",
+            "speakingsubquestion"
+        ],
+        "codename": "change_speakingsubquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete speaking sub question",
+        "content_type": [
+            "exams",
+            "speakingsubquestion"
+        ],
+        "codename": "delete_speakingsubquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view speaking sub question",
+        "content_type": [
+            "exams",
+            "speakingsubquestion"
+        ],
+        "codename": "view_speakingsubquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add reading sub question",
+        "content_type": [
+            "exams",
+            "readingsubquestion"
+        ],
+        "codename": "add_readingsubquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change reading sub question",
+        "content_type": [
+            "exams",
+            "readingsubquestion"
+        ],
+        "codename": "change_readingsubquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete reading sub question",
+        "content_type": [
+            "exams",
+            "readingsubquestion"
+        ],
+        "codename": "delete_readingsubquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view reading sub question",
+        "content_type": [
+            "exams",
+            "readingsubquestion"
+        ],
+        "codename": "view_readingsubquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add listening sub question",
+        "content_type": [
+            "exams",
+            "listeningsubquestion"
+        ],
+        "codename": "add_listeningsubquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change listening sub question",
+        "content_type": [
+            "exams",
+            "listeningsubquestion"
+        ],
+        "codename": "change_listeningsubquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete listening sub question",
+        "content_type": [
+            "exams",
+            "listeningsubquestion"
+        ],
+        "codename": "delete_listeningsubquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view listening sub question",
+        "content_type": [
+            "exams",
+            "listeningsubquestion"
+        ],
+        "codename": "view_listeningsubquestion"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add group",
+        "content_type": [
+            "groups",
+            "group"
+        ],
+        "codename": "add_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change group",
+        "content_type": [
+            "groups",
+            "group"
+        ],
+        "codename": "change_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete group",
+        "content_type": [
+            "groups",
+            "group"
+        ],
+        "codename": "delete_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view group",
+        "content_type": [
+            "groups",
+            "group"
+        ],
+        "codename": "view_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add group student",
+        "content_type": [
+            "groups",
+            "groupstudent"
+        ],
+        "codename": "add_groupstudent"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change group student",
+        "content_type": [
+            "groups",
+            "groupstudent"
+        ],
+        "codename": "change_groupstudent"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete group student",
+        "content_type": [
+            "groups",
+            "groupstudent"
+        ],
+        "codename": "delete_groupstudent"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view group student",
+        "content_type": [
+            "groups",
+            "groupstudent"
+        ],
+        "codename": "view_groupstudent"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add attempt",
+        "content_type": [
+            "attempts",
+            "attempt"
+        ],
+        "codename": "add_attempt"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change attempt",
+        "content_type": [
+            "attempts",
+            "attempt"
+        ],
+        "codename": "change_attempt"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete attempt",
+        "content_type": [
+            "attempts",
+            "attempt"
+        ],
+        "codename": "delete_attempt"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view attempt",
+        "content_type": [
+            "attempts",
+            "attempt"
+        ],
+        "codename": "view_attempt"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add review",
+        "content_type": [
+            "attempts",
+            "review"
+        ],
+        "codename": "add_review"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change review",
+        "content_type": [
+            "attempts",
+            "review"
+        ],
+        "codename": "change_review"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete review",
+        "content_type": [
+            "attempts",
+            "review"
+        ],
+        "codename": "delete_review"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view review",
+        "content_type": [
+            "attempts",
+            "review"
+        ],
+        "codename": "view_review"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can add attempt audio",
+        "content_type": [
+            "attempts",
+            "attemptaudio"
+        ],
+        "codename": "add_attemptaudio"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can change attempt audio",
+        "content_type": [
+            "attempts",
+            "attemptaudio"
+        ],
+        "codename": "change_attemptaudio"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can delete attempt audio",
+        "content_type": [
+            "attempts",
+            "attemptaudio"
+        ],
+        "codename": "delete_attemptaudio"
+    }
+},
+{
+    "model": "auth.permission",
+    "fields": {
+        "name": "Can view attempt audio",
+        "content_type": [
+            "attempts",
+            "attemptaudio"
+        ],
+        "codename": "view_attemptaudio"
+    }
+}
+]

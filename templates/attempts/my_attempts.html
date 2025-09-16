@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+
+{% block title %}Mening Urinishlarim - EduBase{% endblock %}
+
+{% block content %}
+<style>
+    /* Custom light/dark mode classes for this page */
+    .light .bg-card {
+        background-color: #FFFFFF;
+    }
+    .dark .bg-card {
+        background-color: #1A1A1A;
+    }
+    .light .border-card {
+        border-color: #E0E0E0;
+    }
+    .dark .border-card {
+        border-color: #333333;
+    }
+    .light .text-on-card {
+        color: #000000;
+    }
+    .dark .text-on-card {
+        color: #FFFFFF;
+    }
+    .light .text-subtle {
+        color: #555555;
+    }
+    .dark .text-subtle {
+        color: #AAAAAA;
+    }
+    /* Buttons colors */
+    .btn-active {
+        background-color: #000000;
+        color: #FFFFFF;
+        border-color: #000000;
+    }
+    .dark .btn-active {
+        background-color: #FFFFFF;
+        color: #000000;
+        border-color: #FFFFFF;
+    }
+    .btn-inactive {
+        background-color: #FFFFFF;
+        color: #555555;
+        border-color: #E0E0E0;
+    }
+    .dark .btn-inactive {
+        background-color: #1A1A1A;
+        color: #AAAAAA;
+        border-color: #333333;
+    }
+    .btn-inactive:hover {
+        background-color: #F7F7F7;
+    }
+    .dark .btn-inactive:hover {
+        background-color: #222222;
+    }
+</style>
+<div class="py-6">
+    <div class="px-4 sm:px-0">
+        <h1 class="text-3xl font-bold text-text-on-card">Mening Urinishlarim</h1>
+        <p class="mt-2 text-subtle">Barcha test urinishlaringiz tarixi</p>
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-2">
+        <button onclick="filterAttempts('all', event)" id="filter-all"
+            class="filter-btn px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 btn-active">
+            Barchasi
+        </button>
+        <button onclick="filterAttempts('completed', event)" id="filter-completed"
+            class="filter-btn px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 btn-inactive">
+            Bajarilgan
+        </button>
+        <button onclick="filterAttempts('submitted', event)" id="filter-submitted"
+            class="filter-btn px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 btn-inactive">
+            Yuborilgan
+        </button>
+    </div>
+
+    <div id="attempts-container">
+        {% if attempts %}
+        <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" id="attempts-grid">
+            {% for attempt in attempts %}
+            <div
+                class="attempt-card bg-card border border-card rounded-xl p-6 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+                data-status="{{ attempt.status }}">
+                <div class="flex items-start justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-text-on-card line-clamp-2">{{ attempt.exam.title }}</h3>
+                    <span class="status-badge ml-2 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                        {% if attempt.status == 'completed' %}Bajarilgan
+                        {% elif attempt.status == 'submitted' %}Yuborilgan
+                        {% elif attempt.status == 'in_progress' %}Jarayonda
+                        {% else %}{{ attempt.status }}{% endif %}
+                    </span>
+                </div>
+
+                <div class="space-y-3 mb-6">
+                    <div class="flex items-center text-sm text-subtle">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                            </path>
+                        </svg>
+                        {% if attempt.exam.section_type == 'reading' %}Reading
+                        {% elif attempt.exam.section_type == 'listening' %}Listening
+                        {% elif attempt.exam.section_type == 'writing' %}Writing
+                        {% elif attempt.exam.section_type == 'speaking' %}Speaking
+                        {% else %}{{ attempt.exam.section_type|title }}{% endif %}
+                    </div>
+
+                    {% if attempt.total_score %}
+                    <div class="flex items-center text-sm text-subtle">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z">
+                            </path>
+                        </svg>
+                        Ball: <span class="ml-1 font-medium text-text-on-card">{{ attempt.total_score }}/9.0</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex items-center text-sm text-subtle">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Boshlangan: {{ attempt.created_at|date:"d.m.Y H:i" }}
+                    </div>
+
+                    {% if attempt.submitted_at %}
+                    <div class="flex items-center text-sm text-subtle">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                        Yuborilgan: {{ attempt.submitted_at|date:"d.m.Y H:i" }}
+                    </div>
+                    {% endif %}
+
+                    {% if attempt.completed_at %}
+                    <div class="flex items-center text-sm text-subtle">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Bajarilgan: {{ attempt.completed_at|date:"d.m.Y H:i" }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="flex justify-between items-center">
+                    {% if attempt.status == 'in_progress' %}
+                    <a href="{% url 'take_exam' attempt.exam.id %}"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-black text-white hover:bg-gray-800 transition-colors duration-200 dark:bg-white dark:text-black dark:hover:bg-gray-200">
+                        Davom etish
+                    </a>
+                    {% elif attempt.status == 'completed' %}
+                    <span
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
+                        Bajarilgan
+                    </span>
+                    {% if attempt.total_score %}
+                    <span
+                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                        ✓ Baholangan
+                    </span>
+                    {% endif %}
+                    {% elif attempt.status == 'submitted' %}
+                    <span
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
+                        Baholash kutilmoqda
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-8 flex items-center justify-between" id="pagination-container">
+            <div class="flex items-center text-sm text-subtle">
+                <span id="pagination-info">1-10 dan 25 ta ko'rsatilmoqda</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="prev-page" onclick="changePage(-1)"
+                    class="px-3 py-2 text-sm font-medium rounded-lg border border-card bg-card text-subtle hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    disabled>
+                    Oldingi
+                </button>
+                <div id="page-numbers" class="flex items-center space-x-1">
+                    </div>
+                <button id="next-page" onclick="changePage(1)"
+                    class="px-3 py-2 text-sm font-medium rounded-lg border border-card bg-card text-subtle hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
+                    Keyingi
+                </button>
+            </div>
+        </div>
+        {% else %}
+        <div class="mt-8 bg-card border border-card rounded-xl overflow-hidden">
+            <div class="px-6 py-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                    </path>
+                </svg>
+                <h3 class="text-lg font-medium text-text-on-card mb-2">Siz hali hech qanday imtihon topshirmagansiz</h3>
+                <p class="text-subtle mb-4">Mavjud imtihonlarni ko'rish uchun imtihonlar sahifasiga o'ting.</p>
+                <a href="{% url 'exam_list' %}"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-black text-white hover:bg-gray-800 transition-colors duration-200 dark:bg-white dark:text-black dark:hover:bg-gray-200">
+                    Imtihonlarni ko'rish
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="no-results"
+        class="hidden mt-8 bg-card border border-card rounded-xl overflow-hidden">
+        <div class="px-6 py-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-text-on-card mb-2">Hech narsa topilmadi</h3>
+            <p class="text-subtle">Tanlangan filtr bo'yicha hech qanday urinish topilmadi.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentFilter = 'all';
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let allAttempts = [];
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const attemptCards = document.querySelectorAll('.attempt-card');
+        allAttempts = Array.from(attemptCards);
+        updatePagination();
+    });
+
+    function filterAttempts(status, event) {
+        currentFilter = status;
+        currentPage = 1;
+
+        // Update filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('btn-active');
+            btn.classList.add('btn-inactive');
+        });
+        
+        event.currentTarget.classList.remove('btn-inactive');
+        event.currentTarget.classList.add('btn-active');
+
+        updatePagination();
+    }
+
+    function getFilteredAttempts() {
+        if (currentFilter === 'all') {
+            return allAttempts;
+        }
+        return allAttempts.filter(card => card.dataset.status === currentFilter);
+    }
+
+    function updatePagination() {
+        const filteredAttempts = getFilteredAttempts();
+        const totalItems = filteredAttempts.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+        allAttempts.forEach(card => card.style.display = 'none');
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const currentPageAttempts = filteredAttempts.slice(startIndex, endIndex);
+
+        currentPageAttempts.forEach(card => card.style.display = 'block');
+
+        const paginationInfo = document.getElementById('pagination-info');
+        if (totalItems > 0) {
+            const start = startIndex + 1;
+            const end = Math.min(endIndex, totalItems);
+            paginationInfo.textContent = `${start}-${end} dan ${totalItems} ta ko'rsatilmoqda`;
+        } else {
+            paginationInfo.textContent = '0 ta natija';
+        }
+
+        const prevBtn = document.getElementById('prev-page');
+        const nextBtn = document.getElementById('next-page');
+
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+
+        generatePageNumbers(totalPages);
+
+        const noResults = document.getElementById('no-results');
+        const attemptsContainer = document.getElementById('attempts-container');
+        
+        if (totalItems === 0 && allAttempts.length > 0) {
+            noResults.classList.remove('hidden');
+            attemptsContainer.style.display = 'none';
+        } else {
+            noResults.classList.add('hidden');
+            attemptsContainer.style.display = 'block';
+        }
+    }
+
+    function generatePageNumbers(totalPages) {
+        const pageNumbers = document.getElementById('page-numbers');
+        pageNumbers.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.textContent = i;
+            pageBtn.onclick = () => goToPage(i);
+            pageBtn.className = `px-3 py-2 text-sm font-medium rounded-lg border transition-colors duration-200 ${i === currentPage
+                ? 'bg-black text-white border-black dark:bg-white dark:text-black dark:border-white'
+                : 'border-card bg-card text-subtle hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`;
+            pageNumbers.appendChild(pageBtn);
+        }
+    }
+
+    function changePage(direction) {
+        const filteredAttempts = getFilteredAttempts();
+        const totalPages = Math.ceil(filteredAttempts.length / itemsPerPage);
+
+        const newPage = currentPage + direction;
+        if (newPage >= 1 && newPage <= totalPages) {
+            currentPage = newPage;
+            updatePagination();
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        updatePagination();
+    }
+</script>
+{% endblock %}

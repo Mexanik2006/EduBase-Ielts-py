@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Baholash - {{ attempt.exam.title }}{% endblock %}
+
+{% block content %}
+<div class="py-6">
+  <div class="px-4 sm:px-6 lg:px-8">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-foreground">{{ attempt.exam.title }} - Baholash</h1>
+      <p class="mt-1 text-sm text-muted-foreground">Talaba:
+        {{ attempt.student.get_full_name|default:attempt.student.username }}</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Talaba javobi -->
+      <div class="lg:col-span-2">
+        <div class="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+          <div class="px-6 py-4 border-b border-border">
+            <h3 class="text-lg font-medium text-foreground">Talaba javobi</h3>
+          </div>
+          <div class="p-6">
+            {% if attempt.exam.section_type == 'writing' %}
+            {% for task in writing_tasks %}
+              <div class="mb-6 last:mb-0">
+                <h4 class="text-md font-medium text-foreground mb-2">
+                  {{ task.task_type }}: {{ task.title }}
+                </h4>
+
+                <p class="text-sm text-muted-foreground mb-3">{{ task.description }}</p>
+
+                {% if task.image %}
+                  <div class="mb-4">
+                    <img src="{{ task.image.url }}"
+                        class="rounded-lg border border-border max-w-full h-auto max-h-64"
+                        alt="Task image">
+                  </div>
+                {% endif %}
+
+                <div class="bg-muted border border-border rounded-lg p-4">
+                  <h5 class="text-sm font-medium text-foreground mb-2">Talaba javobi:</h5>
+                  <div class="prose prose-sm max-w-none text-foreground whitespace-pre-line">
+                    {{ task.student_answer|default:"Javob berilmagan" }}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+
+
+
+
+            {% elif attempt.exam.section_type == 'speaking' %}
+            {% for part in attempt.exam.speaking_parts.all %}
+            <div class="mb-6 last:mb-0">
+              <h4 class="text-md font-medium text-foreground mb-2">{{ part.get_part_type_display }}: {{ part.title }}
+              </h4>
+
+              {% if part.subtitle %}
+              <p class="text-sm text-muted-foreground mb-3">{{ part.subtitle }}</p>
+              {% endif %}
+
+              <div class="mb-4">
+                <h5 class="text-sm font-medium text-foreground mb-2">Savollar:</h5>
+                <ul class="list-disc list-inside text-sm text-foreground space-y-1">
+                  {% for question in part.sub_questions.all %}
+                  <li>{{ question.text }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              
+              <!-- Simplified audio file access without templatetags -->
+              {% for part_id, audio_file in audio_files.items %}
+                {% if part_id == part.id %}
+                <div class="bg-muted border border-border rounded-lg p-4">
+                  <h5 class="text-sm font-medium text-foreground mb-2">Audio javob:</h5>
+                  <audio controls class="w-full">
+                    <source src="{{ audio_file.url }}" type="audio/wav">
+                    Audio fayl topilmadi
+                  </audio>
+                </div>
+                {% endif %}
+              {% empty %}
+                <div class="bg-muted border border-border rounded-lg p-4">
+                  <h5 class="text-sm font-medium text-foreground mb-2">Audio javob:</h5>
+                  <p class="text-sm text-muted-foreground">Audio javob topilmadi</p>
+                </div>
+              {% endfor %}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Baholash formasi -->
+      <div>
+        <div class="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+          <div class="px-6 py-4 border-b border-border">
+            <h3 class="text-lg font-medium text-foreground">Baholash</h3>
+          </div>
+          <div class="p-6">
+            <form method="post">
+              {% csrf_token %}
+
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-foreground mb-1">Task Achievement</label>
+                  <select
+                    class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground focus:border-foreground"
+                    name="task_achievement" required>
+                    <option value="">Tanlang</option>
+                    {% for score in band_scores %}
+                    <option value="{{ score }}">{{ score }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-foreground mb-1">Coherence & Cohesion</label>
+                  <select
+                    class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground focus:border-foreground"
+                    name="coherence_cohesion" required>
+                    <option value="">Tanlang</option>
+                    {% for score in band_scores %}
+                    <option value="{{ score }}">{{ score }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-foreground mb-1">Lexical Resource</label>
+                  <select
+                    class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground focus:border-foreground"
+                    name="lexical_resource" required>
+                    <option value="">Tanlang</option>
+                    {% for score in band_scores %}
+                    <option value="{{ score }}">{{ score }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-foreground mb-1">Grammatical Range</label>
+                  <select
+                    class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground focus:border-foreground"
+                    name="grammatical_range" required>
+                    <option value="">Tanlang</option>
+                    {% for score in band_scores %}
+                    <option value="{{ score }}">{{ score }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-foreground mb-1">Umumiy ball</label>
+                  <div class="bg-muted border border-border rounded-md p-3">
+                    <p class="text-lg font-semibold text-foreground text-center" id="total-score">0.0</p>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-foreground mb-1">Izoh va tavsiyalar</label>
+                  <textarea
+                    class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground focus:border-foreground"
+                    name="feedback" rows="5" required placeholder="Talabaga izoh va tavsiyalar yozing..."></textarea>
+                </div>
+              </div>
+
+              <div class="mt-6">
+                <button type="submit"
+                  class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md text-sm font-medium text-background bg-foreground hover:bg-foreground/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-foreground transition-colors">
+                  <i class="fas fa-check mr-2"></i> Baholashni saqlash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Umumiy ballni hisoblash
+  function calculateTotalScore() {
+    const taskAchievement = parseFloat(document.querySelector('[name="task_achievement"]').value) || 0;
+    const coherenceCohesion = parseFloat(document.querySelector('[name="coherence_cohesion"]').value) || 0;
+    const lexicalResource = parseFloat(document.querySelector('[name="lexical_resource"]').value) || 0;
+    const grammaticalRange = parseFloat(document.querySelector('[name="grammatical_range"]').value) || 0;
+
+    if (taskAchievement && coherenceCohesion && lexicalResource && grammaticalRange) {
+      const totalScore = ((taskAchievement + coherenceCohesion + lexicalResource + grammaticalRange) / 4).toFixed(1);
+      document.getElementById('total-score').textContent = totalScore;
+    } else {
+      document.getElementById('total-score').textContent = '0.0';
+    }
+  }
+
+  // Selectlarni tinglash
+  document.querySelectorAll('select').forEach(select => {
+    select.addEventListener('change', calculateTotalScore);
+  });
+
+  // Dastlabki hisoblash
+  calculateTotalScore();
+</script>
+{% endblock %}

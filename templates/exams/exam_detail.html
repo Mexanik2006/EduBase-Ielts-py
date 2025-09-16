@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.title }} - EduBase{% endblock %}
+
+{% block content %}
+<style>
+    /* Custom light/dark mode classes for this page */
+    .light .bg-card {
+        background-color: #FFFFFF;
+    }
+    .dark .bg-card {
+        background-color: #1A1A1A;
+    }
+    .light .border-card {
+        border-color: #E0E0E0;
+    }
+    .dark .border-card {
+        border-color: #333333;
+    }
+    .light .text-on-card {
+        color: #000000;
+    }
+    .dark .text-on-card {
+        color: #FFFFFF;
+    }
+    .light .text-subtle {
+        color: #555555;
+    }
+    .dark .text-subtle {
+        color: #AAAAAA;
+    }
+</style>
+
+<div class="py-6 space-y-8">
+    <div class="px-4 sm:px-0">
+        <nav class="flex mb-6" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+                <li>
+                    <div>
+                        <a href="{% url 'exam_list' %}"
+                           class="text-subtle hover:text-text-on-card transition-colors duration-200">
+                            <i class="fas fa-book-open mr-2"></i>Testlar
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-subtle mx-2"></i>
+                        <span class="text-text-on-card font-medium">{{ exam.title }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div class="lg:col-span-2">
+                <div class="bg-card border border-card rounded-xl shadow-sm overflow-hidden">
+                    <div class="px-6 py-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h1 class="text-2xl font-bold text-text-on-card">{{ exam.title }}</h1>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                {{ exam.get_section_type_display }}
+                            </span>
+                        </div>
+
+                        {% if exam.description %}
+                        <p class="text-subtle leading-relaxed">{{ exam.description }}</p>
+                        {% endif %}
+
+                        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="flex items-center p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border border-card">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-clock text-text-on-card text-lg"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-text-on-card">Vaqt</p>
+                                    <p class="text-sm text-subtle">{{ exam.time_limit }} daqiqa</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border border-card">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-list text-text-on-card text-lg"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-text-on-card">Bo'lim</p>
+                                    <p class="text-sm text-subtle">{{ exam.get_section_type_display }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if existing_attempt %}
+                        <div class="mt-6 bg-gray-100 dark:bg-gray-800 border border-card rounded-lg p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-info-circle text-text-on-card"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-text-on-card">Urinish holati</h3>
+                                    <div class="mt-2 text-sm text-subtle">
+                                        <p>Siz bu testni {{ existing_attempt.created_at|date:"d.m.Y H:i" }} da topshirgansiz.</p>
+                                        {% if existing_attempt.status == 'completed' %}
+                                        <p class="mt-1 font-semibold text-text-on-card">Ball: {{ existing_attempt.total_score }}</p>
+                                        {% elif existing_attempt.status == 'submitted' %}
+                                        <p class="mt-1 font-semibold text-text-on-card">Tekshirilmoqda...</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="bg-card border border-card rounded-xl shadow-sm overflow-hidden">
+                    <div class="px-6 py-6">
+                        <h3 class="text-lg font-semibold text-text-on-card mb-4">Test haqida</h3>
+                        <div class="space-y-4">
+                            {% if exam.section_type == 'reading' %}
+                            <div class="flex items-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                                <i class="fas fa-book text-text-on-card"></i>
+                                <span class="ml-3 text-sm font-medium text-text-on-card">Reading bo'limi</span>
+                            </div>
+                            <p class="text-sm text-subtle">Matnlarni o'qib, savollarga javob bering.</p>
+                            {% elif exam.section_type == 'listening' %}
+                            <div class="flex items-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                                <i class="fas fa-headphones text-text-on-card"></i>
+                                <span class="ml-3 text-sm font-medium text-text-on-card">Listening bo'limi</span>
+                            </div>
+                            <p class="text-sm text-subtle">Audio yozuvlarni tinglab, savollarga javob bering.</p>
+                            {% elif exam.section_type == 'writing' %}
+                            <div class="flex items-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                                <i class="fas fa-pen text-text-on-card"></i>
+                                <span class="ml-3 text-sm font-medium text-text-on-card">Writing bo'limi</span>
+                            </div>
+                            <p class="text-sm text-subtle">Berilgan mavzu bo'yicha insho yozing.</p>
+                            {% elif exam.section_type == 'speaking' %}
+                            <div class="flex items-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                                <i class="fas fa-microphone text-text-on-card"></i>
+                                <span class="ml-3 text-sm font-medium text-text-on-card">Speaking bo'limi</span>
+                            </div>
+                            <p class="text-sm text-subtle">Savollarga og'zaki javob bering.</p>
+                            {% endif %}
+                        </div>
+
+                        {% if not existing_attempt and user.profile.role == 'student' %}
+                        <div class="mt-6">
+                            <a href="{% url 'take_exam' exam.id %}"
+                               class="w-full flex justify-center items-center py-3 px-4 border border-card rounded-lg text-sm font-medium text-white bg-black hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-colors duration-200">
+                                <i class="fas fa-play mr-2"></i> Testni boshlash
+                            </a>
+                        </div>
+                        {% elif existing_attempt %}
+                        <div class="mt-6">
+                            <button
+                                class="w-full flex justify-center items-center py-3 px-4 border border-card rounded-lg text-sm font-medium text-subtle bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
+                                disabled>
+                                Test topshirilgan
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

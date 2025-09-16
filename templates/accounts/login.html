@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kirish | EduBase IELTS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.4s, color 0.4s;
+        }
+
+        /* Light Mode Colors */
+        .light {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+
+        .light .card {
+            background-color: #F7F7F7;
+            border-color: #E0E0E0;
+        }
+
+        .light .form-bg {
+            background-color: #FFFFFF;
+        }
+
+        .light .input-field {
+            background-color: #FFFFFF;
+            border-color: #D4D4D4;
+            color: #000000;
+        }
+
+        .light .input-field::placeholder {
+            color: #A0A0A0;
+        }
+
+        .light .btn-primary {
+            background-color: #000000;
+            color: #FFFFFF;
+        }
+
+        .light .btn-primary:hover {
+            background-color: #333333;
+        }
+
+        .light .text-primary {
+            color: #000000;
+        }
+
+        /* Dark Mode Colors */
+        .dark {
+            background-color: #000000;
+            color: #FFFFFF;
+        }
+
+        .dark .card {
+            background-color: #1A1A1A;
+            border-color: #333333;
+        }
+
+        .dark .form-bg {
+            background-color: #000000;
+        }
+
+        .dark .input-field {
+            background-color: #000000;
+            border-color: #444444;
+            color: #FFFFFF;
+        }
+
+        .dark .input-field::placeholder {
+            color: #777777;
+        }
+
+        .dark .btn-primary {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+
+        .dark .btn-primary:hover {
+            background-color: #DDDDDD;
+        }
+
+        .dark .text-primary {
+            color: #FFFFFF;
+        }
+
+        /* --- Custom Loader Animation --- */
+        .loader-pulse {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: block;
+            position: relative;
+            background: currentColor;
+            box-sizing: border-box;
+        }
+
+        .loader-pulse::after {
+            content: '';
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse-animation 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% {
+                transform: scale(0.9);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-center p-4 antialiased light">
+
+    <button id="themeToggle"
+        class="fixed top-6 right-6 z-50 p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 shadow-lg">
+        <svg id="sunIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+            </path>
+        </svg>
+        <svg id="moonIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+        </svg>
+    </button>
+
+    <div
+        class="w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl card transition-colors duration-300 grid md:grid-cols-2 lg:grid-cols-2">
+
+        <div class="p-8 md:p-12 flex flex-col items-center justify-center text-center">
+            <div class="space-y-6">
+                <div class="text-3xl lg:text-4xl font-extrabold text-primary">
+                    IELTS Imtihonlariga Professional Tayyorgarlik
+                </div>
+                <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+                    Tajribali o'qituvchilar va zamonaviy metodikalar bilan maqsadlaringizga erishing.
+                </p>
+                <div class="inline-block text-left text-primary">
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-lg text-green-500 mr-3"></i>
+                            <span class="font-medium">Professional O'qituvchilar</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-lg text-green-500 mr-3"></i>
+                            <span class="font-medium">Individual Darslar</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-lg text-green-500 mr-3"></i>
+                            <span class="font-medium">Haqiqiy Mock Testlar</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-lg text-green-500 mr-3"></i>
+                            <span class="font-medium">24/7 Qo'llab-Quvvatlash</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8 md:p-12 flex items-center justify-center form-bg">
+            <div class="w-full max-w-sm">
+                <div class="flex items-center mb-6">
+                    <div class="text-3xl font-bold text-primary">
+                        EduBase IELTS
+                    </div>
+                </div>
+                <h1 class="text-2xl font-semibold text-primary mb-2">Xush kelibsiz!</h1>
+                <p class="text-gray-600 dark:text-gray-400 mb-6 text-sm">
+                    Hisobingizga kirish uchun ma'lumotlaringizni kiriting.
+                </p>
+
+                <form method="post" class="space-y-5" id="loginForm">
+                    {% csrf_token %}
+                    <div>
+                        <label for="username"
+                            class="block mb-2 text-sm text-primary font-medium">Username</label>
+                        <input id="username" name="username" type="text" required placeholder="Usernameni kiriting..."
+                            class="input-field w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all duration-200">
+                    </div>
+                    <div>
+                        <label for="password"
+                            class="block mb-2 text-sm text-primary font-medium">Parol</label>
+                        <div class="relative">
+                            <input id="password" name="password" type="password" required
+                                placeholder="Parolni kiriting..."
+                                class="input-field w-full px-4 py-3 pr-12 rounded-xl border focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all duration-200">
+                            <button type="button" id="togglePassword"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none transition-colors duration-200">
+                                <i id="eyeIcon" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" id="submitBtn"
+                        class="w-full py-3 rounded-xl btn-primary font-semibold active:scale-[0.98] transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="btnText">Kirish</span>
+                        <div id="btnLoader" class="loader-pulse ml-2 hidden"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div id="notification"
+        class="fixed top-6 left-1/2 transform -translate-x-1/2 translate-y-[-100px] max-w-xs p-4 rounded-xl shadow-lg z-50 transition-transform duration-500
+                    {% for message in messages %}{% if message.tags == 'error' %}bg-red-600 text-white
+                    {% else %}bg-black text-white dark:bg-white dark:text-black{% endif %}{% endfor %}">
+        {% for message in messages %}
+        <div class="font-bold mb-1">{{ message.tags|title }}</div>
+        <div class="text-sm">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+
+            function applyTheme(theme) {
+                if (theme === 'dark') {
+                    body.classList.remove('light');
+                    body.classList.add('dark');
+                    sunIcon.classList.add('hidden');
+                    moonIcon.classList.remove('hidden');
+                } else {
+                    body.classList.remove('dark');
+                    body.classList.add('light');
+                    sunIcon.classList.remove('hidden');
+                    moonIcon.classList.add('hidden');
+                }
+            }
+
+            applyTheme(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const isDark = body.classList.contains('dark');
+                const newTheme = isDark ? 'light' : 'dark';
+                applyTheme(newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+
+            // Notification animation
+            const notif = document.getElementById("notification");
+            if (notif) {
+                setTimeout(() => {
+                    notif.classList.remove("translate-y-[-100px]");
+                }, 10);
+                setTimeout(() => {
+                    notif.classList.add("translate-y-[-100px]");
+                }, 4000);
+            }
+
+            // Password toggle functionality
+            const togglePassword = document.getElementById("togglePassword");
+            const passwordInput = document.getElementById("password");
+            const eyeIcon = document.getElementById("eyeIcon");
+
+            if (togglePassword && passwordInput && eyeIcon) {
+                togglePassword.addEventListener("click", function () {
+                    const isPassword = passwordInput.getAttribute("type") === "password";
+                    passwordInput.setAttribute("type", isPassword ? "text" : "password");
+                    eyeIcon.classList.toggle("fa-eye", isPassword);
+                    eyeIcon.classList.toggle("fa-eye-slash", !isPassword);
+                });
+            }
+
+            // Form submission and loading state
+            const form = document.getElementById("loginForm");
+            const btn = document.getElementById("submitBtn");
+            const btnText = document.getElementById("btnText");
+            const btnLoader = document.getElementById("btnLoader");
+            const usernameInput = document.getElementById("username");
+            const passwordInputField = document.getElementById("password");
+
+            if (form && btn && btnText && btnLoader) {
+                form.addEventListener("submit", function (e) {
+                    const username = usernameInput.value.trim();
+                    const password = passwordInputField.value;
+
+                    if (!username || !password) {
+                        e.preventDefault();
+                        if (!username) usernameInput.classList.add("border-red-500");
+                        if (!password) passwordInputField.classList.add("border-red-500");
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    btnText.textContent = "";
+                    btnLoader.classList.remove("hidden");
+                });
+            }
+
+            // Remove error styling on input
+            [usernameInput, passwordInputField].forEach(input => {
+                if (input) {
+                    input.addEventListener("input", function () {
+                        this.classList.remove("border-red-500");
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

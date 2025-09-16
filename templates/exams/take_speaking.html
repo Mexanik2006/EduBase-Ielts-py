@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.title }} - Speaking{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ exam.title }} - Speaking</h1>
+                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Bu bo'limda sizning og'zaki nutqingiz baholanadi. Tayyor bo'lsangiz, testni boshlang.</p>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex space-x-2 overflow-x-auto">
+                    {% for part in exam.speaking_parts.all %}
+                    <button type="button" onclick="showPart({{ forloop.counter0 }})" id="part-indicator-{{ forloop.counter0 }}"
+                        class="part-indicator flex-shrink-0 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200
+                                {% if forloop.first %}bg-black text-white dark:bg-white dark:text-black{% else %}bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600{% endif %}">
+                        Part {{ forloop.counter }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <form id="examForm" method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+
+            {% for part in exam.speaking_parts.all %}
+            <div class="part-container space-y-6" id="part-container-{{ forloop.counter0 }}"
+                style="display: {% if forloop.first %}block{% else %}none{% endif %};">
+                <div class="flex gap-6">
+                    <div class="flex-1">
+                        <div class="bg-white dark:bg-black shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800">
+                            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ part.get_part_type_display }}: {{ part.title }}</h3>
+                                {% if part.subtitle %}
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ part.subtitle }}</p>
+                                {% endif %}
+                                <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Vaqt: <span class="font-semibold">{{ part.time_limit }} daqiqa</span></p>
+                            </div>
+                            <div class="p-6 max-h-[80vh] overflow-y-auto">
+                                <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4">Savollar:</h4>
+                                <ul class="list-disc list-inside space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed select-text">
+                                    {% for sub in part.sub_questions.all %}
+                                    <li class="pl-2">{{ sub.text }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex-1">
+                        <div class="bg-white dark:bg-black shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 h-full flex flex-col">
+                            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+                                <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ part.get_part_type_display }} - Javobingiz</h4>
+                            </div>
+                            <div class="p-6 flex-1 flex flex-col justify-center items-center space-y-6">
+                                <div class="space-y-4 text-center">
+                                    <div class="flex justify-center space-x-4">
+                                        <button type="button" class="record-btn inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors" data-part-id="{{ part.id }}">
+                                            <i class="fas fa-microphone mr-2"></i> Yozishni boshlash
+                                        </button>
+                                        <button type="button" class="stop-btn inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors hidden" data-part-id="{{ part.id }}">
+                                            <i class="fas fa-stop mr-2"></i> To'xtatish
+                                        </button>
+                                        <button type="button" class="reset-btn inline-flex items-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hidden" data-part-id="{{ part.id }}">
+                                            <i class="fas fa-redo mr-2"></i> Qayta yozish
+                                        </button>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        <div class="recording-status text-md text-gray-600 dark:text-gray-400 font-medium" data-part-id="{{ part.id }}">
+                                            Mikrofon yordamida javobingizni yozing
+                                        </div>
+                                        <div class="recording-timer text-2xl font-mono text-gray-800 dark:text-gray-200 mt-2 hidden" data-part-id="{{ part.id }}">
+                                            00:00
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="audio-container hidden bg-gray-200 dark:bg-gray-700 rounded-lg p-3 w-full" data-part-id="{{ part.id }}">
+                                    <h5 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Yozilgan audio:</h5>
+                                    <audio class="audio-playback w-full" controls controlslist="nodownload" data-part-id="{{ part.id }}">
+                                        <source type="audio/wav">
+                                        Your browser does not support audio playback.
+                                    </audio>
+                                </div>
+
+                                <div class="mt-6 w-full">
+                                    <h5 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Qo'shimcha eslatmalar (ixtiyoriy):</h5>
+                                    <textarea name="part_{{ part.id }}_notes"
+                                        class="w-full px-3 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-black dark:focus:border-white resize-none"
+                                        rows="4" placeholder="Qo'shimcha eslatmalar yoki javoblaringizni yozishingiz mumkin..."
+                                        data-part-id="{{ part.id }}"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="flex justify-between items-center mt-8">
+                <button type="button" id="prev-part-btn" onclick="previousPart()"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black dark:focus:ring-white"
+                    style="display: none;">
+                    <i class="fas fa-chevron-left mr-2"></i> Oldingi
+                </button>
+
+                <div class="flex-1"></div>
+
+                <button type="button" id="next-part-btn" onclick="nextPart()"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black dark:focus:ring-white">
+                    Keyingi <i class="fas fa-chevron-right ml-2"></i>
+                </button>
+
+                <button type="submit" id="submit-btn"
+                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+                    style="display: none;">
+                    <i class="fas fa-paper-plane mr-2"></i> Javoblarni yuborish
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let currentPart = 0;
+    const totalParts = {{ exam.speaking_parts.count }};
+    let audioBlobs = {};
+    let mediaRecorders = {};
+    let recordingTimers = {};
+
+    const partIds = [
+        {% for part in exam.speaking_parts.all %}
+        {{ part.id }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    function showPart(partIndex) {
+        document.querySelectorAll('.part-container').forEach(container => {
+            container.style.display = 'none';
+        });
+
+        document.getElementById(`part-container-${partIndex}`).style.display = 'block';
+
+        document.querySelectorAll('[id^="part-indicator-"]').forEach((indicator, index) => {
+            if (index === partIndex) {
+                indicator.className = 'part-indicator flex-shrink-0 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 bg-black text-white dark:bg-white dark:text-black';
+            } else {
+                indicator.className = 'part-indicator flex-shrink-0 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600';
+            }
+        });
+
+        const prevBtn = document.getElementById('prev-part-btn');
+        const nextBtn = document.getElementById('next-part-btn');
+        const submitBtn = document.getElementById('submit-btn');
+
+        if (partIndex === 0) {
+            prevBtn.style.display = 'none';
+        } else {
+            prevBtn.style.display = 'inline-flex';
+        }
+
+        if (partIndex === totalParts - 1) {
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'inline-flex';
+        } else {
+            nextBtn.style.display = 'inline-flex';
+            submitBtn.style.display = 'none';
+        }
+
+        currentPart = partIndex;
+    }
+
+    function nextPart() {
+        if (currentPart < totalParts - 1) {
+            showPart(currentPart + 1);
+        }
+    }
+
+    function previousPart() {
+        if (currentPart > 0) {
+            showPart(currentPart - 1);
+        }
+    }
+
+    // Recording functionality
+    function initializeRecording() {
+        const recordBtns = document.querySelectorAll('.record-btn');
+        const stopBtns = document.querySelectorAll('.stop-btn');
+        const resetBtns = document.querySelectorAll('.reset-btn');
+        const notesTextareas = document.querySelectorAll('textarea[name^="part_"][name$="_notes"]');
+
+        recordBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const partId = this.dataset.partId;
+                startRecording(partId);
+            });
+        });
+
+        stopBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const partId = this.dataset.partId;
+                stopRecording(partId);
+            });
+        });
+
+        resetBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const partId = this.dataset.partId;
+                resetRecording(partId);
+            });
+        });
+
+        notesTextareas.forEach(textarea => {
+            const partId = textarea.dataset.partId;
+            const savedContent = localStorage.getItem(`speaking_notes_${partId}`);
+            if (savedContent) {
+                textarea.value = savedContent;
+            }
+            textarea.addEventListener('input', function () {
+                localStorage.setItem(`speaking_notes_${partId}`, this.value);
+            });
+        });
+
+        // Load saved audio blobs on page load
+        partIds.forEach(partId => {
+            const savedAudioURL = localStorage.getItem(`speaking_audio_${partId}`);
+            if (savedAudioURL) {
+                fetch(savedAudioURL)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        audioBlobs[partId] = blob;
+                        const audioPlayback = document.querySelector(`.audio-playback[data-part-id="${partId}"]`);
+                        const audioContainer = document.querySelector(`.audio-container[data-part-id="${partId}"]`);
+                        const recordBtn = document.querySelector(`.record-btn[data-part-id="${partId}"]`);
+                        const resetBtn = document.querySelector(`.reset-btn[data-part-id="${partId}"]`);
+                        const status = document.querySelector(`.recording-status[data-part-id="${partId}"]`);
+
+                        audioPlayback.src = URL.createObjectURL(blob);
+                        audioContainer.classList.remove('hidden');
+                        recordBtn.classList.add('hidden');
+                        resetBtn.classList.remove('hidden');
+                        status.textContent = 'Yozish yakunlandi. Audio tinglashingiz mumkin.';
+                        status.className = 'recording-status text-md font-medium text-green-600 dark:text-green-400';
+                    })
+                    .catch(e => console.error("Failed to load saved audio:", e));
+            }
+        });
+    }
+
+    function startRecording(partId) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                const mediaRecorder = new MediaRecorder(stream);
+                mediaRecorders[partId] = mediaRecorder;
+                const audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    audioBlobs[partId] = audioBlob;
+
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    localStorage.setItem(`speaking_audio_${partId}`, audioUrl);
+
+                    const audioPlayback = document.querySelector(`.audio-playback[data-part-id="${partId}"]`);
+                    const audioContainer = document.querySelector(`.audio-container[data-part-id="${partId}"]`);
+                    audioPlayback.src = audioUrl;
+                    audioContainer.classList.remove('hidden');
+
+                    updateRecordingStatus(partId, 'Yozish yakunlandi. Audio tinglashingiz mumkin.', 'text-green-600 dark:text-green-400');
+
+                    const resetBtn = document.querySelector(`.reset-btn[data-part-id="${partId}"]`);
+                    resetBtn.classList.remove('hidden');
+
+                    if (recordingTimers[partId]) {
+                        clearInterval(recordingTimers[partId]);
+                        delete recordingTimers[partId];
+                    }
+                    const timer = document.querySelector(`.recording-timer[data-part-id="${partId}"]`);
+                    timer.classList.add('hidden');
+                };
+
+                mediaRecorder.start();
+
+                const recordBtn = document.querySelector(`.record-btn[data-part-id="${partId}"]`);
+                const stopBtn = document.querySelector(`.stop-btn[data-part-id="${partId}"]`);
+                recordBtn.classList.add('hidden');
+                stopBtn.classList.remove('hidden');
+
+                updateRecordingStatus(partId, 'Yozish boshlandi...', 'text-red-600 dark:text-red-400 animate-pulse');
+
+                startRecordingTimer(partId);
+            })
+            .catch(err => {
+                updateRecordingStatus(partId, 'Mikrofon ruxsati berilmadi. Iltimos, ruxsat bering va qayta urinib ko\'ring.', 'text-red-600 dark:text-red-400');
+                console.error('Microphone access denied:', err);
+            });
+    }
+
+    function stopRecording(partId) {
+        if (mediaRecorders[partId] && mediaRecorders[partId].state !== 'inactive') {
+            mediaRecorders[partId].stop();
+            mediaRecorders[partId].stream.getTracks().forEach(track => track.stop());
+        }
+
+        const recordBtn = document.querySelector(`.record-btn[data-part-id="${partId}"]`);
+        const stopBtn = document.querySelector(`.stop-btn[data-part-id="${partId}"]`);
+        recordBtn.classList.remove('hidden');
+        stopBtn.classList.add('hidden');
+    }
+
+    function resetRecording(partId) {
+        stopRecording(partId);
+
+        const audioPlayback = document.querySelector(`.audio-playback[data-part-id="${partId}"]`);
+        const audioContainer = document.querySelector(`.audio-container[data-part-id="${partId}"]`);
+
+        if (audioPlayback.src) {
+            URL.revokeObjectURL(audioPlayback.src);
+        }
+
+        audioPlayback.src = '';
+        audioContainer.classList.add('hidden');
+
+        delete audioBlobs[partId];
+        localStorage.removeItem(`speaking_audio_${partId}`);
+
+        const resetBtn = document.querySelector(`.reset-btn[data-part-id="${partId}"]`);
+        resetBtn.classList.add('hidden');
+
+        updateRecordingStatus(partId, 'Mikrofon yordamida javobingizni yozing', 'text-gray-600 dark:text-gray-400');
+        const timer = document.querySelector(`.recording-timer[data-part-id="${partId}"]`);
+        timer.classList.add('hidden');
+    }
+
+    function startRecordingTimer(partId) {
+        let seconds = 0;
+        const timer = document.querySelector(`.recording-timer[data-part-id="${partId}"]`);
+        timer.classList.remove('hidden');
+
+        if (recordingTimers[partId]) {
+            clearInterval(recordingTimers[partId]);
+        }
+
+        recordingTimers[partId] = setInterval(() => {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            timer.textContent = mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+            seconds++;
+        }, 1000);
+    }
+
+    function updateRecordingStatus(partId, message, className) {
+        const status = document.querySelector(`.recording-status[data-part-id="${partId}"]`);
+        status.textContent = message;
+        status.className = 'recording-status text-md font-medium ' + className;
+    }
+
+    // Form Submission
+    document.getElementById('examForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Yuborilmoqda...';
+
+        const formData = new FormData(this);
+
+        partIds.forEach(partId => {
+            if (audioBlobs[partId]) {
+                formData.append('speaking_part_' + partId + '_audio', audioBlobs[partId], 'speaking_part_' + partId + '.wav');
+            }
+        });
+
+        // Clear local storage
+        localStorage.removeItem('examTimeLeft_{{ exam.id }}');
+        localStorage.removeItem('examStartTime_{{ exam.id }}');
+        partIds.forEach(partId => {
+            localStorage.removeItem(`speaking_notes_${partId}`);
+            localStorage.removeItem(`speaking_audio_${partId}`);
+        });
+
+        fetch('/attempts/submit/{{ exam.id }}/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('Xatolik: ' + (data.error || 'Noma\'lum xatolik'));
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Javoblarni yuborish';
+                }
+            })
+            .catch(error => {
+                console.error('Submission error:', error);
+                alert('Yuborishda xatolik yuz berdi. Iltimos qayta urinib ko\'ring.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Javoblarni yuborish';
+            });
+    });
+
+    // Initialize everything when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        showPart(0);
+        initializeRecording();
+    });
+</script>
+{% endblock %}
