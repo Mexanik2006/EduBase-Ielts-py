@@ -12,7 +12,4 @@ django-nested-admin~=4.1.4
 gunicorn
 psycopg2-binary
 dj-database-url
-python-dotenv
 whitenoise
-cloudinary
-django-cloudinary-storage
