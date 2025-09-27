@@ -1,12 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required 
 from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import Attempt, Review, AttemptAudio
-from exams.models import Exam
+from .models import Attempt, Review, AttemptAudio    # SubQuestions ni tartib bo'yicha olishsub_questions = ReadingSubQuestion.objects.filter(questions__passage__exam=exam).order_by("order")
+from exams.models import Exam, ReadingSubQuestion
 from groups.models import Group, GroupStudent
 
 @login_required
@@ -80,12 +80,16 @@ def submit_attempt(request, exam_id):
 
         # Agar Reading/Listening bo'lsa, avtomatik baholash
         if exam.section_type in ['reading', 'listening']:
-            score = calculate_auto_score(exam, answers)
+            score, correct, incorrect = calculate_auto_score(exam, answers)
+
             if exam.section_type == 'reading':
                 attempt.reading_score = score
             else:
                 attempt.listening_score = score
+
             attempt.total_score = score
+            attempt.correct_count = correct
+            attempt.incorrect_count = incorrect
             attempt.status = 'completed'
             attempt.completed_at = timezone.now()
 
@@ -104,17 +108,40 @@ def submit_attempt(request, exam_id):
         }, status=500)
     
 def normalize_answer(ans):
-    """Faqat variant harfini qaytaradi (A, B, C ...)"""
+    """Normalize answers for comparison, handling both lists and strings"""
     if not ans:
         return ""
-    if isinstance(ans, list):  # agar list bo‘lsa
-        ans = ans[0]           # faqat birinchi elementni olamiz
-    ans = str(ans).strip()
-    return ans[0].lower() if ans else ""
+    
+    # Handle list answers
+    if isinstance(ans, list):
+        ans = ans[0] if ans else ""
+    
+    # Convert to string and normalize
+    ans = str(ans).strip().lower()
+    
+    # Remove any periods or other punctuation after letters
+    # Example: "A." -> "a", "A.Matt Elliot" -> "a"
+    if ans and ans[0].isalpha():
+        # Extract just the letter if it's a multiple choice answer
+        return ans[0]
+    
+    # For non-multiple choice answers, still normalize but keep the full text
+    return ans
+    
+    # Handle multiple choice answers (A, B, C...)
+    if len(ans) == 1 and ans.isalpha():
+        return ans
+    elif ans and ans[0].isalpha() and ans[1:2] == ')':
+        return ans[0]
+    elif ans and ans[0].isalpha() and ans[1:2] == '.':
+        return ans[0]
+    
+    # For non-multiple choice answers, return the full text
+    return ans
 
 
 def calculate_auto_score(exam, answers):
-    """Calculate automatic score for reading/listening exams"""
+    """Calculate automatic score for reading/listening exams using IELTS scoring bands"""
     correct_count = 0
     total_questions = 0
 
@@ -130,6 +157,17 @@ def calculate_auto_score(exam, answers):
 
                         if student_answer == correct_answer:
                             correct_count += 1
+        
+        # IELTS Reading score conversion table (40 questions total)
+        ielts_reading_bands = {
+            40: 9.0, 39: 9.0, 38: 8.5, 37: 8.5, 36: 8.0, 35: 8.0,
+            34: 7.5, 33: 7.5, 32: 7.0, 31: 7.0, 30: 7.0, 29: 6.5,
+            28: 6.5, 27: 6.0, 26: 6.0, 25: 6.0, 24: 5.5, 23: 5.5,
+            22: 5.0, 21: 5.0, 20: 5.0, 19: 4.5, 18: 4.5, 17: 4.0,
+            16: 4.0, 15: 4.0, 14: 3.5, 13: 3.5, 12: 3.0, 11: 3.0,
+            10: 3.0, 9: 2.5, 8: 2.5, 7: 2.0, 6: 2.0, 5: 2.0,
+            4: 1.5, 3: 1.5, 2: 1.0, 1: 1.0, 0: 1.0
+        }
 
     elif exam.section_type == 'listening':
         for audio in exam.listening_audios.all():
@@ -143,19 +181,30 @@ def calculate_auto_score(exam, answers):
 
                         if student_answer == correct_answer:
                             correct_count += 1
+        
+        # IELTS Listening score conversion table (40 questions total)
+        ielts_listening_bands = {
+            40: 9.0, 39: 9.0, 38: 8.5, 37: 8.5, 36: 8.0, 35: 8.0,
+            34: 7.5, 33: 7.5, 32: 7.0, 31: 7.0, 30: 6.5, 29: 6.5,
+            28: 6.0, 27: 6.0, 26: 5.5, 25: 5.5, 24: 5.0, 23: 5.0,
+            22: 4.5, 21: 4.5, 20: 4.0, 19: 4.0, 18: 3.5, 17: 3.5,
+            16: 3.0, 15: 3.0, 14: 2.5, 13: 2.5, 12: 2.0, 11: 2.0,
+            10: 1.5, 9: 1.5, 8: 1.0, 7: 1.0, 6: 1.0, 5: 1.0,
+            4: 1.0, 3: 1.0, 2: 1.0, 1: 1.0, 0: 1.0
+        }
 
-    if total_questions == 0:
-        return 0.0
+    # Calculate band score based on section type
+    if exam.section_type == 'reading':
+        band_score = ielts_reading_bands.get(correct_count, 1.0)
+    else:  # listening
+        band_score = ielts_listening_bands.get(correct_count, 1.0)
 
-    # Convert to IELTS band score (0-9 with .5 steps)
-    percentage = (correct_count / total_questions) * 100
+    incorrect_count = total_questions - correct_count
+    
+    return band_score, correct_count, incorrect_count
 
-    # Har 10% = 1 ball, keyin .5 ni ham hisoblash uchun round qilyapmiz
-    raw_band = percentage / 10  
-    band = round(raw_band * 2) / 2  
-
-    # Maksimal qiymat 9.0 dan oshmasligi uchun
-    return min(band, 9.0)
+    incorrect_count = total_questions - correct_count
+    return band_score, correct_count, incorrect_count
 
 
 @login_required
@@ -284,3 +333,49 @@ def pending_reviews(request):
     }
     
     return render(request, 'attempts/pending_reviews.html', context)
+
+
+def attempt_result(request, attempt_id):
+    attempt = get_object_or_404(Attempt, id=attempt_id)
+    answers = []
+    
+    # Load answers from JSON field
+    if attempt.answers:
+        try:
+            answers_dict = json.loads(attempt.answers)
+            # Convert answers to format needed by template
+            for question_id, given_answer in answers_dict.items():
+                # Strip 'q_' prefix if present
+                real_id = question_id.replace('q_', '') if question_id.startswith('q_') else question_id
+                try:
+                    question = ReadingSubQuestion.objects.get(id=real_id)
+                    # Handle both list and string answers
+                    if isinstance(given_answer, list):
+                        given_answer_text = ', '.join(str(x) for x in given_answer)
+                    else:
+                        given_answer_text = str(given_answer)
+
+                    # Use normalize_answer for comparison
+                    normalized_student_answer = normalize_answer(given_answer)
+                    normalized_correct_answer = normalize_answer(question.correct_answer)
+                    
+                    # For display, keep the original formatting
+                    display_answer = given_answer_text.strip()
+                    
+                    answers.append({
+                        'question': question,
+                        'given_answer': display_answer,
+                        'is_correct': normalized_student_answer == normalized_correct_answer
+                    })
+                except ReadingSubQuestion.DoesNotExist:
+                    continue
+        except json.JSONDecodeError:
+            pass
+    
+    context = {
+        'attempt': attempt,
+        'answers': answers,
+        'correct_count': attempt.correct_count or 0,
+        'incorrect_count': attempt.incorrect_count or 0,
+    }
+    return render(request, "attempts/attempt_detail.html", context)

@@ -152,6 +152,8 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               {% if attempt.status == 'submitted' and attempt.exam.section_type in 'writing,speaking' %}
               <a href="{% url 'review_attempt' attempt.id %}" class="text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-150">Tekshirish</a>
+              {% elif attempt.status == 'completed' and attempt.exam.section_type in 'reading,listening' %}
+              <a href="{% url 'attempt_detail' attempt.id %}" class="text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-150">Natijani ko'rish</a>
               {% endif %}
             </td>
           </tr>

@@ -99,10 +99,19 @@
                                     <h3 class="text-sm font-medium text-text-on-card">Urinish holati</h3>
                                     <div class="mt-2 text-sm text-subtle">
                                         <p>Siz bu testni {{ existing_attempt.created_at|date:"d.m.Y H:i" }} da topshirgansiz.</p>
+                                        
                                         {% if existing_attempt.status == 'completed' %}
-                                        <p class="mt-1 font-semibold text-text-on-card">Ball: {{ existing_attempt.total_score }}</p>
+                                            <p class="mt-1 font-semibold text-text-on-card">Ball: {{ existing_attempt.total_score }}</p>
+
+                                            {% if existing_attempt.exam.section_type == 'reading' or existing_attempt.exam.section_type == 'listening' %}
+                                                <p class="mt-1 text-text-on-card">
+                                                    ✅ To‘g‘ri: {{ existing_attempt.correct_count }}<br>
+                                                    ❌ Noto‘g‘ri: {{ existing_attempt.incorrect_count }}
+                                                </p>
+                                            {% endif %}
+                                        
                                         {% elif existing_attempt.status == 'submitted' %}
-                                        <p class="mt-1 font-semibold text-text-on-card">Tekshirilmoqda...</p>
+                                            <p class="mt-1 font-semibold text-text-on-card">Tekshirilmoqda...</p>
                                         {% endif %}
                                     </div>
                                 </div>

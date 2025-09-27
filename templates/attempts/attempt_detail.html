@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Urinish tafsilotlari{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <h1 class="text-2xl font-bold text-text-on-card mb-2">{{ attempt.exam.title }}</h1>
+    <p class="text-subtle mb-4">Boshlangan: {{ attempt.created_at|date:"d.m.Y H:i" }}</p>
+
+    <div class="mb-6 flex space-x-6">
+        <span class="text-green-600 font-semibold">✅ To‘g‘ri: {{ correct_count }}</span>
+        <span class="text-red-600 font-semibold">❌ Noto‘g‘ri: {{ incorrect_count }}</span>
+        {% if attempt.total_score %}
+            <span class="font-medium">Ball: {{ attempt.total_score }}/9.0</span>
+        {% endif %}
+    </div>
+
+    <div class="space-y-6">
+        {% for answer in answers %}
+        <div class="bg-card border border-card rounded-lg p-4">
+            <p class="font-medium text-text-on-card mb-2">Savol {{ forloop.counter }}:</p>
+            <p class="mb-2">{{ answer.question.text }}</p>
+
+            <p class="text-sm">
+                Sizning javobingiz:
+                {% if answer.is_correct %}
+                    <span class="text-green-600 font-semibold">✅ {{ answer.given_answer }}</span>
+                {% else %}
+                    <span class="text-red-600 font-semibold">❌ {{ answer.given_answer }}</span>
+                {% endif %}
+            </p>
+
+            {% if not answer.is_correct %}
+            <p class="text-sm text-subtle">
+                To‘g‘ri javob: <span class="font-semibold text-green-600">{{ answer.question.correct_answer }}</span>
+            </p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-6">
+        {% if user.profile.role == 'mentor' %}
+        <a href="{% url 'mentor_dashboard' %}"
+           class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+            ⬅️ Mentor paneliga qaytish
+        </a>
+        {% else %}
+        <a href="{% url 'my_attempts' %}"
+           class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+            ⬅️ Urinishlar ro'yxatiga qaytish
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

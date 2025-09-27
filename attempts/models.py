@@ -22,6 +22,9 @@ class Attempt(models.Model):
     speaking_score = models.FloatField(null=True, blank=True)
     total_score = models.FloatField(null=True, blank=True)
     
+    correct_count = models.IntegerField(null=True, blank=True)
+    incorrect_count = models.IntegerField(null=True, blank=True)
+
     # Answers (JSON field would be better, but using TextField for simplicity)
     answers = models.TextField(blank=True, help_text="JSON format answers")
     

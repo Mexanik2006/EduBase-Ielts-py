@@ -6,4 +6,5 @@ urlpatterns = [
     path('review/<int:attempt_id>/', views.review_attempt, name='review_attempt'),
     path('my-attempts/', views.my_attempts, name='my_attempts'),
     path('pending-reviews/', views.pending_reviews, name='pending_reviews'),
+    path("attempt/<int:attempt_id>/", views.attempt_result, name="attempt_detail"),
 ]
